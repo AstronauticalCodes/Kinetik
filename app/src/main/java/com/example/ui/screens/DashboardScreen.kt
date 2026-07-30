@@ -66,9 +66,10 @@ public fun DashboardScreen(
   sharedTransitionScope: SharedTransitionScope,
   onNavigateToAsset: (String) -> Unit,
   modifier: Modifier = Modifier,
-  viewModel: CryptoViewModel = viewModel()
+  viewModel: CryptoViewModel = viewModel(factory = com.example.viewmodel.CryptoViewModelFactory(androidx.compose.ui.platform.LocalContext.current))
 ): Unit {
   val state by viewModel.state.collectAsState()
+  val uiState by viewModel.uiState.collectAsState()
   val candles by viewModel.candles.collectAsState()
 
   with(sharedTransitionScope) {
@@ -129,7 +130,10 @@ public fun DashboardScreen(
               .padding(all = 16.dp),
             verticalArrangement = Arrangement.spacedBy(space = 12.dp)
           ) {
-            PortfolioSummarySection()
+            PortfolioSummarySection(
+              totalNetWorth = uiState.totalNetWorth,
+              dailyPnl = uiState.dailyPnl
+            )
             Row(
               modifier = Modifier.fillMaxWidth(fraction = 1.0f),
               horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
@@ -144,6 +148,10 @@ public fun DashboardScreen(
               state = state,
               candles = candles
             )
+            TopMoversSection(
+              movers = uiState.topMovers,
+              onNavigateToAsset = onNavigateToAsset
+            )
           }
         }
       }
@@ -153,7 +161,15 @@ public fun DashboardScreen(
 
 
 @Composable
-public fun PortfolioSummarySection(): Unit {
+public fun PortfolioSummarySection(
+  totalNetWorth: Double = 0.0,
+  dailyPnl: Double = 0.0
+): Unit {
+  val formattedNetWorth = if (totalNetWorth > 0) String.format(java.util.Locale.US, "$%,.2f", totalNetWorth) else "$0.00"
+  val isPositivePnl = dailyPnl >= 0
+  val formattedPnlStr = "${if (isPositivePnl) "+" else ""}${String.format(java.util.Locale.US, "$%,.2f", dailyPnl)} TODAY"
+  val pnlPctStr = if (totalNetWorth > 0) String.format(java.util.Locale.US, "%+.2f%%", (dailyPnl / totalNetWorth) * 100) else "+0.00%"
+
   Column(
     modifier = Modifier
       .fillMaxWidth(fraction = 1.0f)
@@ -168,7 +184,7 @@ public fun PortfolioSummarySection(): Unit {
     )
     Spacer(modifier = Modifier.height(height = 4.dp))
     Text(
-      text = "$42,850.12",
+      text = formattedNetWorth,
       style = DataLarge.copy(fontSize = 40.sp),
       color = md_theme_dark_primaryContainer
     )
@@ -178,26 +194,26 @@ public fun PortfolioSummarySection(): Unit {
     ) {
       Row(
         modifier = Modifier
-          .background(color = Color(color = 0xFF007117).copy(alpha = 0.1f), shape = CircleShape)
+          .background(color = (if (isPositivePnl) Color(0xFF007117) else Color(0xFFB3261E)).copy(alpha = 0.1f), shape = CircleShape)
           .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
         Icon(
           imageVector = Icons.Filled.TrendingUp,
           contentDescription = "Up",
-          tint = secondary_fixed_dim,
+          tint = if (isPositivePnl) secondary_fixed_dim else Color(0xFFFFB4AB),
           modifier = Modifier.size(size = 16.dp)
         )
         Spacer(modifier = Modifier.width(width = 4.dp))
         Text(
-          text = "+5.24%",
+          text = pnlPctStr,
           style = DataMedium,
-          color = secondary_fixed_dim
+          color = if (isPositivePnl) secondary_fixed_dim else Color(0xFFFFB4AB)
         )
       }
       Spacer(modifier = Modifier.width(width = 8.dp))
       Text(
-        text = "+$2,134.10 TODAY",
+        text = formattedPnlStr,
         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
         color = md_theme_dark_onSurfaceVariant
       )
@@ -246,7 +262,10 @@ public fun TickerTapeSection(tickers: List<com.example.data.TickerResponse>): Un
 }
 
 @Composable
-public fun TopMoversSection(): Unit {
+public fun TopMoversSection(
+  movers: List<com.example.data.TickerResponse> = emptyList(),
+  onNavigateToAsset: (String) -> Unit = {}
+): Unit {
   Column(
     modifier = Modifier
       .fillMaxWidth(fraction = 1.0f)
@@ -270,40 +289,54 @@ public fun TopMoversSection(): Unit {
       )
     }
     Spacer(modifier = Modifier.height(height = 16.dp))
-    Row(
-      modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-      horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
-    ) {
-      MoverCard(
-        modifier = Modifier.weight(weight = 1.0f),
-        symbol = "PEPE",
-        change = "+18.4%",
-        price = "$0.0000082"
-      )
-      MoverCard(
-        modifier = Modifier.weight(weight = 1.0f),
-        symbol = "RNDR",
-        change = "+12.1%",
-        price = "$10.42"
-      )
-    }
-    Spacer(modifier = Modifier.height(height = 12.dp))
-    Row(
-      modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-      horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
-    ) {
-      MoverCard(
-        modifier = Modifier.weight(weight = 1.0f),
-        symbol = "FET",
-        change = "+9.8%",
-        price = "$2.45"
-      )
-      MoverCard(
-        modifier = Modifier.weight(weight = 1.0f),
-        symbol = "ONDO",
-        change = "+7.2%",
-        price = "$0.88"
-      )
+
+    val displayList = movers.take(4)
+    if (displayList.isEmpty()) {
+      Row(
+        modifier = Modifier.fillMaxWidth(fraction = 1.0f),
+        horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
+      ) {
+        MoverCard(
+          modifier = Modifier.weight(weight = 1.0f),
+          symbol = "BTC",
+          change = "+2.5%",
+          price = "$65,000.00"
+        )
+        MoverCard(
+          modifier = Modifier.weight(weight = 1.0f),
+          symbol = "ETH",
+          change = "+12.8%",
+          price = "$3,500.00"
+        )
+      }
+    } else {
+      val rows = displayList.chunked(2)
+      rows.forEach { rowItems ->
+        Row(
+          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
+          horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
+        ) {
+          rowItems.forEach { ticker ->
+            val symbol = ticker.symbol.replace("USDT", "")
+            val pct = ticker.priceChangePercent.toDoubleOrNull() ?: 0.0
+            val pctStr = String.format(java.util.Locale.US, "%+.2f%%", pct)
+            val price = ticker.lastPrice.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "$%,.2f", it) } ?: "$${ticker.lastPrice}"
+            val isPositive = pct >= 0
+
+            MoverCard(
+              modifier = Modifier.weight(weight = 1.0f).clickable { onNavigateToAsset(symbol) },
+              symbol = symbol,
+              change = pctStr,
+              price = price,
+              isPositive = isPositive
+            )
+          }
+          if (rowItems.size == 1) {
+            Spacer(modifier = Modifier.weight(weight = 1.0f))
+          }
+        }
+        Spacer(modifier = Modifier.height(height = 12.dp))
+      }
     }
   }
 }
@@ -313,7 +346,8 @@ public fun MoverCard(
   modifier: Modifier = Modifier,
   symbol: String,
   change: String,
-  price: String
+  price: String,
+  isPositive: Boolean = true
 ): Unit {
   Column(
     modifier = modifier
@@ -349,7 +383,7 @@ public fun MoverCard(
     Text(
       text = change,
       style = DataLarge,
-      color = secondary_fixed_dim
+      color = if (isPositive) secondary_fixed_dim else Color(0xFFFFB4AB)
     )
     Spacer(modifier = Modifier.height(height = 4.dp))
     Text(

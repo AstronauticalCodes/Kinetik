@@ -47,10 +47,17 @@ public fun OrderConfirmationSheet(
   sheetState: SheetState,
   onDismissRequest: () -> Unit,
   onConfirm: () -> Unit,
-  asset: String,
-  amount: String,
-  price: String,
-  total: String
+  asset: String = "BTC",
+  amount: String = "0.01",
+  price: String = "$64,120.32",
+  total: String = "$641.20",
+  payAsset: String = asset,
+  receiveAsset: String = "BTC",
+  payAmount: String = amount,
+  receiveAmount: String = amount,
+  rate: String = price,
+  networkFee: String = "0.0001 BTC",
+  errorMessage: String? = null
 ): Unit {
   ModalBottomSheet(
     onDismissRequest = onDismissRequest,
@@ -66,11 +73,24 @@ public fun OrderConfirmationSheet(
     ) {
       Text(text = "CONFIRM ORDER", style = MaterialTheme.typography.titleMedium, color = md_theme_dark_onSurface)
       Spacer(modifier = Modifier.height(height = 24.dp))
+
+      if (errorMessage != null) {
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+            .background(color = Color(0xFF3B1216), shape = RoundedCornerShape(8.dp))
+            .border(width = 1.dp, color = Color(0xFFFFB4AB), shape = RoundedCornerShape(8.dp))
+            .padding(all = 12.dp)
+        ) {
+          Text(text = errorMessage, color = Color(0xFFFFB4AB), style = MaterialTheme.typography.bodyMedium)
+        }
+      }
       
-      Text(text = "You are buying", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-      Text(text = "$amount $asset", style = DataLarge.copy(fontSize = 32.sp), color = primary_fixed_dim)
+      Text(text = "You are swapping", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+      Text(text = "$payAmount $payAsset → $receiveAmount $receiveAsset", style = DataLarge.copy(fontSize = 24.sp), color = primary_fixed_dim)
       
-      Spacer(modifier = Modifier.height(height = 32.dp))
+      Spacer(modifier = Modifier.height(height = 24.dp))
       
       Column(
         modifier = Modifier
@@ -79,16 +99,22 @@ public fun OrderConfirmationSheet(
           .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f), shape = RoundedCornerShape(size = 12.dp))
           .padding(all = 16.dp)
       ) {
-        OrderRowContent(label = "Price per $asset", value = price)
+        OrderRowContent(label = "Pay Amount", value = "$payAmount $payAsset")
         Spacer(modifier = Modifier.height(height = 12.dp))
-        OrderRowContent(label = "Network Fee", value = "0.0001 BTC")
+        OrderRowContent(label = "Receive Amount", value = "$receiveAmount $receiveAsset")
+        Spacer(modifier = Modifier.height(height = 12.dp))
+        if (rate.isNotEmpty()) {
+          OrderRowContent(label = "Exchange Rate", value = rate)
+          Spacer(modifier = Modifier.height(height = 12.dp))
+        }
+        OrderRowContent(label = "Network Fee", value = networkFee)
         Spacer(modifier = Modifier.height(height = 12.dp))
         Box(modifier = Modifier.fillMaxWidth(fraction = 1.0f).height(height = 1.dp).background(color = Color.White.copy(alpha = 0.1f)))
         Spacer(modifier = Modifier.height(height = 12.dp))
         OrderRowContent(label = "Total Cost", value = total, valueColor = primary_fixed_dim)
       }
       
-      Spacer(modifier = Modifier.height(height = 32.dp))
+      Spacer(modifier = Modifier.height(height = 24.dp))
       
       Button(
         onClick = onConfirm,

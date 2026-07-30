@@ -42,7 +42,8 @@ public fun AppNavGraph(
       }
       composable(route = "portfolio") {
         com.example.ui.screens.PortfolioScreen(
-          onNavigateToHistory = { navController.navigate("transactionHistory") }
+          onNavigateToHistory = { navController.navigate("transactionHistory") },
+          onNavigateToAsset = { symbol -> navController.navigate("assetDetail/$symbol") }
         )
       }
       composable(route = "trade") {

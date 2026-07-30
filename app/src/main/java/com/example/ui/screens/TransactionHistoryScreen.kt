@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,24 +41,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.theme.DataMedium
 import com.example.ui.theme.md_theme_dark_onSurface
 import com.example.ui.theme.md_theme_dark_onSurfaceVariant
 import com.example.ui.theme.primary_fixed_dim
 import com.example.ui.theme.secondary_fixed_dim
 import com.example.ui.theme.surface_container_low
+import com.example.viewmodel.CryptoViewModel
+import com.example.viewmodel.CryptoViewModelFactory
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun TransactionHistoryScreen(
   onNavigateBack: () -> Unit,
   onNavigateToReceipt: (String) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  viewModel: CryptoViewModel = viewModel(factory = CryptoViewModelFactory(LocalContext.current))
 ): Unit {
   var showFilterSheet by remember { mutableStateOf(value = false) }
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+  val uiState by viewModel.uiState.collectAsState()
 
   Scaffold(
     modifier = modifier.fillMaxSize(fraction = 1.0f),
@@ -117,34 +125,43 @@ public fun TransactionHistoryScreen(
       ) {
         item {
           Spacer(modifier = Modifier.height(height = 16.dp))
-          Text(text = "TODAY", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+          Text(text = "RECENT TRANSACTIONS", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
           Spacer(modifier = Modifier.height(height = 8.dp))
         }
-        item {
-          TransactionItem(
-            type = "Received", asset = "BTC", amount = "+0.042 BTC", fiat = "+$2,642.10",
-            icon = Icons.Filled.CallReceived, color = secondary_fixed_dim,
-            onClick = { onNavigateToReceipt("TX-9982") }
-          )
-        }
-        item {
-          TransactionItem(
-            type = "Sent", asset = "ETH", amount = "-1.2 ETH", fiat = "-$3,842.12",
-            icon = Icons.Filled.CallMade, color = md_theme_dark_onSurface,
-            onClick = { onNavigateToReceipt("TX-9981") }
-          )
-        }
-        item {
-          Spacer(modifier = Modifier.height(height = 16.dp))
-          Text(text = "YESTERDAY", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-          Spacer(modifier = Modifier.height(height = 8.dp))
-        }
-        item {
-          TransactionItem(
-            type = "Trade", asset = "SOL", amount = "+42.5 SOL", fiat = "+$6,142.00",
-            icon = Icons.Filled.CallReceived, color = secondary_fixed_dim,
-            onClick = { onNavigateToReceipt("TX-9980") }
-          )
+
+        if (uiState.transactions.isEmpty()) {
+          item {
+            TransactionItem(
+              type = "Received", asset = "BTC", amount = "+0.042 BTC", fiat = "+$2,642.10",
+              icon = Icons.Filled.CallReceived, color = secondary_fixed_dim,
+              onClick = { onNavigateToReceipt("TX-9982") }
+            )
+          }
+          item {
+            TransactionItem(
+              type = "Sent", asset = "ETH", amount = "-1.2 ETH", fiat = "-$3,842.12",
+              icon = Icons.Filled.CallMade, color = md_theme_dark_onSurface,
+              onClick = { onNavigateToReceipt("TX-9981") }
+            )
+          }
+        } else {
+          items(count = uiState.transactions.size) { index ->
+            val tx = uiState.transactions[index]
+            val icon = if (tx.type == "BUY" || tx.type == "SWAP") Icons.Filled.CallReceived else Icons.Filled.CallMade
+            val color = if (tx.type == "BUY" || tx.type == "SWAP") secondary_fixed_dim else Color(0xFFFFB4AB)
+            val amountStr = "${String.format(Locale.US, "%.4f", tx.fromAmount)} ${tx.fromAsset}"
+            val fiatStr = "$${String.format(Locale.US, "%.2f", tx.fromAmount * tx.priceUsd)}"
+
+            TransactionItem(
+              type = tx.type,
+              asset = "${tx.fromAsset} → ${tx.toAsset}",
+              amount = amountStr,
+              fiat = fiatStr,
+              icon = icon,
+              color = color,
+              onClick = { onNavigateToReceipt("TX-${tx.id}") }
+            )
+          }
         }
       }
     }

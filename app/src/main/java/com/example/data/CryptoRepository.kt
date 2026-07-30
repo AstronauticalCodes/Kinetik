@@ -136,13 +136,16 @@ class CryptoRepository(
     }
 
     private fun getPriceForAsset(symbol: String, prices: Map<String, Double>): Double {
-        if (symbol.uppercase(Locale.ROOT) == "USD") return 1.0
-        return prices[symbol] ?: prices["${symbol}USDT"] ?: 0.0
+        val upper = symbol.uppercase(Locale.ROOT)
+        if (upper == "USD" || upper == "USDC" || upper == "USDT") return 1.0
+        return prices[symbol] ?: prices["${symbol}USDT"] ?: prices[upper] ?: 0.0
     }
 
     private fun getNameForAsset(symbol: String): String {
         return when (symbol.uppercase(Locale.ROOT)) {
             "USD" -> "US Dollar"
+            "USDC" -> "USD Coin"
+            "USDT" -> "Tether"
             "BTC" -> "Bitcoin"
             "ETH" -> "Ethereum"
             "SOL" -> "Solana"

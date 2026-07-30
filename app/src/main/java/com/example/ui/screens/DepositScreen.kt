@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -136,14 +137,42 @@ public fun DepositScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val depositAddress = "0x8920...3B8c"
         Text(
-          text = "0x8920...3B8c",
+          text = depositAddress,
           style = DataMedium.copy(fontSize = 16.sp),
           color = md_theme_dark_onSurface
         )
         Row(horizontalArrangement = Arrangement.spacedBy(space = 16.dp)) {
-          Icon(imageVector = Icons.Filled.ContentCopy, contentDescription = "Copy", tint = primary_fixed_dim, modifier = Modifier.size(size = 20.dp))
-          Icon(imageVector = Icons.Filled.Share, contentDescription = "Share", tint = md_theme_dark_onSurfaceVariant, modifier = Modifier.size(size = 20.dp))
+          Icon(
+            imageVector = Icons.Filled.ContentCopy,
+            contentDescription = "Copy",
+            tint = primary_fixed_dim,
+            modifier = Modifier
+              .size(size = 20.dp)
+              .clickable {
+                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Deposit Address", depositAddress)
+                clipboard?.setPrimaryClip(clip)
+                android.widget.Toast.makeText(context, "Address copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+              }
+          )
+          Icon(
+            imageVector = Icons.Filled.Share,
+            contentDescription = "Share",
+            tint = md_theme_dark_onSurfaceVariant,
+            modifier = Modifier
+              .size(size = 20.dp)
+              .clickable {
+                val intent = android.content.Intent().apply {
+                  action = android.content.Intent.ACTION_SEND
+                  putExtra(android.content.Intent.EXTRA_TEXT, depositAddress)
+                  type = "text/plain"
+                }
+                context.startActivity(android.content.Intent.createChooser(intent, "Share Deposit Address"))
+              }
+          )
         }
       }
       

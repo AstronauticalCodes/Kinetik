@@ -67,7 +67,7 @@ public fun AssetDetailScreen(
   sharedTransitionScope: SharedTransitionScope,
   onNavigateBack: () -> Unit,
   modifier: Modifier = Modifier,
-  viewModel: CryptoViewModel = viewModel()
+  viewModel: CryptoViewModel = viewModel(factory = com.example.viewmodel.CryptoViewModelFactory(androidx.compose.ui.platform.LocalContext.current))
 ): Unit {
   var showOrderSheet by remember { mutableStateOf(value = false) }
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -77,12 +77,16 @@ public fun AssetDetailScreen(
 
   // Find ticker for current symbol, suffixing with USDT
   val tickerSymbol = "${symbol}USDT"
-  val currentTicker = state.tickers.find { it.symbol == tickerSymbol }
+  val currentTicker = state.tickers.find { it.symbol == tickerSymbol || it.symbol == symbol }
   
   val price = currentTicker?.lastPrice?.toFloatOrNull()?.let { String.format(java.util.Locale.US, "%.2f", it) } ?: "64,120.32"
   val changePct = currentTicker?.priceChangePercent?.toFloatOrNull() ?: 2.4f
   val changeStr = "${if (changePct >= 0) "+" else ""}${String.format(java.util.Locale.US, "%.2f", changePct)}%"
   val isPositive = changePct >= 0
+
+  val highStr = currentTicker?.highPrice?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "$%,.2f", it) } ?: "$0.00"
+  val lowStr = currentTicker?.lowPrice?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "$%,.2f", it) } ?: "$0.00"
+  val volStr = currentTicker?.volume?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "%,.2f", it) } ?: "0.00"
 
   // Trigger klines fetch if not already present
   androidx.compose.runtime.LaunchedEffect(symbol) {
@@ -243,9 +247,9 @@ public fun AssetDetailScreen(
               .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(space = 8.dp)
           ) {
-            InfoCard(title = "24H HIGH", value = "$65,240", modifier = Modifier.weight(weight = 1.0f))
-            InfoCard(title = "24H LOW", value = "$63,890", modifier = Modifier.weight(weight = 1.0f))
-            InfoCard(title = "VOL", value = "24.1B", modifier = Modifier.weight(weight = 1.0f))
+            InfoCard(title = "24H HIGH", value = highStr, modifier = Modifier.weight(weight = 1.0f))
+            InfoCard(title = "24H LOW", value = lowStr, modifier = Modifier.weight(weight = 1.0f))
+            InfoCard(title = "VOL", value = volStr, modifier = Modifier.weight(weight = 1.0f))
           }
           Spacer(modifier = Modifier.height(height = 24.dp))
         }

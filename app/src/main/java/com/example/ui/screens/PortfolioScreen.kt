@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,13 +33,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.theme.DataLarge
 import com.example.ui.theme.DataMedium
 import com.example.ui.theme.md_theme_dark_onSurface
@@ -48,13 +52,23 @@ import com.example.ui.theme.primary_fixed_dim
 import com.example.ui.theme.secondary_fixed_dim
 import com.example.ui.theme.surface_container_high
 import com.example.ui.theme.surface_container_low
+import com.example.viewmodel.CryptoViewModel
+import com.example.viewmodel.CryptoViewModelFactory
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun PortfolioScreen(
   onNavigateToHistory: () -> Unit = {},
-  modifier: Modifier = Modifier
+  onNavigateToAsset: (String) -> Unit = {},
+  modifier: Modifier = Modifier,
+  viewModel: CryptoViewModel = viewModel(factory = CryptoViewModelFactory(LocalContext.current))
 ): Unit {
+  val uiState by viewModel.uiState.collectAsState()
+
+  val totalNetWorth = uiState.totalNetWorth
+  val dailyPnl = uiState.dailyPnl
+
   Scaffold(
     modifier = modifier.fillMaxSize(fraction = 1.0f),
     topBar = {
@@ -106,7 +120,7 @@ public fun PortfolioScreen(
     ) {
       item {
         Spacer(modifier = Modifier.height(height = 16.dp))
-        // Placeholder for the Donut Chart
+        // Balance Banner Card
         Box(
           modifier = Modifier
             .fillMaxWidth(fraction = 1.0f)
@@ -116,7 +130,11 @@ public fun PortfolioScreen(
         ) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "BALANCE", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-            Text(text = "$142,850", style = DataLarge.copy(fontSize = 32.sp), color = md_theme_dark_primaryContainer)
+            Text(
+              text = if (totalNetWorth > 0) String.format(Locale.US, "$%,.2f", totalNetWorth) else "$0.00",
+              style = DataLarge.copy(fontSize = 32.sp),
+              color = md_theme_dark_primaryContainer
+            )
           }
         }
         Spacer(modifier = Modifier.height(height = 24.dp))
@@ -138,9 +156,18 @@ public fun PortfolioScreen(
              }
              Spacer(modifier = Modifier.height(height = 4.dp))
              Row(verticalAlignment = Alignment.Bottom) {
-               Text(text = "$142,850.42", style = DataLarge.copy(fontSize = 24.sp), color = primary_fixed_dim)
+               Text(
+                 text = if (totalNetWorth > 0) String.format(Locale.US, "$%,.2f", totalNetWorth) else "$0.00",
+                 style = DataLarge.copy(fontSize = 24.sp),
+                 color = primary_fixed_dim
+               )
                Spacer(modifier = Modifier.width(width = 8.dp))
-               Text(text = "+12.4%", style = DataMedium, color = secondary_fixed_dim)
+               val pnlPct = if (totalNetWorth > 0) (dailyPnl / totalNetWorth) * 100 else 0.0
+               Text(
+                 text = String.format(Locale.US, "%+.1f%%", pnlPct),
+                 style = DataMedium,
+                 color = if (pnlPct >= 0) secondary_fixed_dim else Color(0xFFFFB4AB)
+               )
              }
           }
         }
@@ -157,7 +184,11 @@ public fun PortfolioScreen(
           ) {
              Text(text = "Daily PNL", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
              Spacer(modifier = Modifier.height(height = 4.dp))
-             Text(text = "+$1,422.10", style = DataMedium, color = secondary_fixed_dim)
+             Text(
+               text = "${if (dailyPnl >= 0) "+" else ""}${String.format(Locale.US, "$%,.2f", dailyPnl)}",
+               style = DataMedium,
+               color = if (dailyPnl >= 0) secondary_fixed_dim else Color(0xFFFFB4AB)
+             )
           }
           Column(
             modifier = Modifier
@@ -187,23 +218,64 @@ public fun PortfolioScreen(
         }
         Spacer(modifier = Modifier.height(height = 16.dp))
       }
-      item { HoldingItem(name = "Bitcoin", amount = "0.8842 BTC", price = "$64,120.32", change = "+142.4%", avgBuy = "$26,450", roi = "+$33.2K", value = "$56.7K") }
-      item { Spacer(modifier = Modifier.height(height = 8.dp)) }
-      item { HoldingItem(name = "Ethereum", amount = "12.44 ETH", price = "$3,450.12", change = "+88.1%", avgBuy = "$1,834", roi = "+$20.1K", value = "$42.9K") }
-      item { Spacer(modifier = Modifier.height(height = 8.dp)) }
-      item { HoldingItem(name = "Solana", amount = "150.00 SOL", price = "$142.88", change = "-12.4%", avgBuy = "$163.12", roi = "-$3.03K", value = "$21.4K", isPositive = false) }
+
+      if (uiState.holdings.isEmpty()) {
+        item {
+          Text("No holdings yet", color = Color.White.copy(alpha = 0.5f))
+        }
+      } else {
+        items(count = uiState.holdings.size) { index ->
+          val holding = uiState.holdings[index]
+          val ticker = uiState.tickers.find {
+            it.symbol == "${holding.assetSymbol}USDT" || it.symbol == holding.assetSymbol
+          }
+          val currentPrice = if (holding.isFiat) 1.0 else (ticker?.lastPrice?.toDoubleOrNull() ?: holding.avgBuyPriceUsd)
+          val value = holding.amount * currentPrice
+          val changePct = ticker?.priceChangePercent?.toDoubleOrNull() ?: 0.0
+          val isPositive = changePct >= 0
+          val changeStr = "${if (isPositive) "+" else ""}${String.format(Locale.US, "%.2f", changePct)}%"
+          val priceStr = String.format(Locale.US, "$%,.2f", currentPrice)
+          val valueStr = String.format(Locale.US, "$%,.2f", value)
+          val amountStr = "${String.format(Locale.US, "%.4f", holding.amount)} ${holding.assetSymbol}"
+          val avgBuyStr = String.format(Locale.US, "$%,.2f", holding.avgBuyPriceUsd)
+          val roiValue = (currentPrice - holding.avgBuyPriceUsd) * holding.amount
+          val roiStr = "${if (roiValue >= 0) "+" else ""}${String.format(Locale.US, "$%,.2f", roiValue)}"
+
+          HoldingItem(
+            name = holding.name,
+            amount = amountStr,
+            price = priceStr,
+            change = changeStr,
+            avgBuy = avgBuyStr,
+            roi = roiStr,
+            value = valueStr,
+            isPositive = isPositive,
+            onClick = { onNavigateToAsset(holding.assetSymbol) }
+          )
+          Spacer(modifier = Modifier.height(height = 8.dp))
+        }
+      }
     }
   }
 }
 
 @Composable
 public fun HoldingItem(
-  name: String, amount: String, price: String, change: String, avgBuy: String, roi: String, value: String, isPositive: Boolean = true
+  name: String,
+  amount: String,
+  price: String,
+  change: String,
+  avgBuy: String,
+  roi: String,
+  value: String,
+  isPositive: Boolean = true,
+  onClick: () -> Unit = {}
 ): Unit {
   Column(
     modifier = Modifier
       .fillMaxWidth(fraction = 1.0f)
       .background(color = surface_container_low.copy(alpha = 0.8f), shape = RoundedCornerShape(size = 12.dp))
+      .clickable { onClick() }
       .padding(all = 16.dp)
   ) {
     Row(

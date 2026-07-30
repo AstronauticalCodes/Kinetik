@@ -149,6 +149,7 @@ public fun MarketsScreen(
           )
         }
         
+        val selectedCategoryState = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0) }
         LazyRow(
           modifier = Modifier.fillMaxWidth(fraction = 1.0f),
           contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -157,7 +158,7 @@ public fun MarketsScreen(
           val categories: List<String> = listOf("ALL ASSETS", "DEFI", "LAYER 1", "AI", "METAVERSE", "GAMING")
           items(count = categories.size) { index ->
             val category: String = categories[index]
-            val isSelected: Boolean = index == 0
+            val isSelected: Boolean = index == selectedCategoryState.value
             Box(
               modifier = Modifier
                 .background(
@@ -169,6 +170,7 @@ public fun MarketsScreen(
                   color = if (isSelected) primary_fixed_dim.copy(alpha = 0.5f) else Color.Transparent,
                   shape = RoundedCornerShape(size = 12.dp)
                 )
+                .clickable { selectedCategoryState.value = index }
                 .padding(horizontal = 16.dp, vertical = 8.dp),
               contentAlignment = Alignment.Center
             ) {
