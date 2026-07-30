@@ -7,6 +7,7 @@ import com.example.data.AppDatabase
 import com.example.data.CryptoRepository
 import com.example.data.HoldingEntity
 import com.example.data.TickerResponse
+import com.example.data.TransactionEntity
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals

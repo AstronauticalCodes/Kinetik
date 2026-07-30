@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.example.data.AppDatabase
 import com.example.data.CryptoRepository
 import com.example.data.HoldingEntity
+import com.example.data.TransactionEntity
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -54,6 +55,28 @@ class Tier2BoundaryCornerCasesTest {
         // USD Balance remains untouched
         val usdHolding = database.holdingDao().getHoldingBySymbol("USD")
         assertEquals(100.0, usdHolding?.amount ?: 0.0, 0.001)
+    }
+
+    @Test
+    fun testMicroExcessBalanceTradeValidation() = runBlocking {
+        database.holdingDao().insertHolding(HoldingEntity("USD", "US Dollar", 100.0, 1.0, isFiat = true))
+        val marketPrices = mapOf("BTC" to 50000.0)
+
+        // Attempting to spend $100.000001 when balance is $100.0 (exceeding balance by 0.000001)
+        val result = repository.executeTrade("USD", "BTC", 100.000001, marketPrices)
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertTrue(exception is IllegalStateException)
+        assertTrue(exception?.message?.contains("Insufficient balance") == true)
+
+        // USD Balance remains untouched
+        val usdHolding = database.holdingDao().getHoldingBySymbol("USD")
+        assertEquals(100.0, usdHolding?.amount ?: 0.0, 0.0000001)
+
+        // Transaction log remains empty
+        val transactions = repository.getAllTransactions()
+        assertEquals(0, transactions.size)
     }
 
     @Test
