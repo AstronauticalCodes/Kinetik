@@ -60,12 +60,24 @@ public class CryptoViewModel(
                 val netWorth = repository.calculateNetWorth(holdings, priceMap)
                 val sortedMovers = repository.getTopMovers(legacyState.tickers)
 
+                val dailyPnl = holdings.sumOf { holding ->
+                    if (holding.isFiat) 0.0
+                    else {
+                        val ticker = legacyState.tickers.find { 
+                            it.symbol == "${holding.assetSymbol}USDT" || it.symbol == holding.assetSymbol 
+                        }
+                        val change = ticker?.priceChange?.toDoubleOrNull() ?: 0.0
+                        holding.amount * change
+                    }
+                }
+
                 _uiState.value.copy(
                     holdings = holdings,
                     transactions = transactions,
                     tickers = legacyState.tickers,
                     topMovers = sortedMovers,
                     totalNetWorth = netWorth,
+                    dailyPnl = dailyPnl,
                     isLoading = legacyState.isLoading,
                     error = legacyState.error
                 )
@@ -126,5 +138,14 @@ public class CryptoViewModel(
                 // handle error silently
             }
         }
+    }
+}
+
+class CryptoViewModelFactory(private val context: android.content.Context) : androidx.lifecycle.ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        val db = com.example.data.AppDatabase.getDatabase(context.applicationContext)
+        val repo = com.example.data.CryptoRepository(db.holdingDao(), db.transactionDao())
+        return CryptoViewModel(repo) as T
     }
 }
