@@ -1,0 +1,16 @@
+# Gradle & Build output
+.gradle/
+build/
+app/build/
+
+# IDE & Editor settings
+.idea/
+*.iml
+.DS_Store
+
+# Local configuration & secrets
+local.properties
+.env
+
+# Agent Metadata
+.agents/
