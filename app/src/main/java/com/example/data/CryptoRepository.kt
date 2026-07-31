@@ -99,11 +99,11 @@ class CryptoRepository(
             else -> "SWAP"
         }
 
-        // Deduct from source asset
+        
         val newFromAmount = fromHolding.amount - amount
         holdingDao.insertHolding(fromHolding.copy(amount = newFromAmount))
 
-        // Add to destination asset
+        
         val toHolding = holdingDao.getHoldingBySymbol(toAsset)
         if (toHolding != null) {
             val newToAmount = toHolding.amount + toAmount
@@ -119,7 +119,7 @@ class CryptoRepository(
             holdingDao.insertHolding(newHolding)
         }
 
-        // Record transaction log
+        
         val transaction = TransactionEntity(
             timestamp = System.currentTimeMillis(),
             type = tradeType,

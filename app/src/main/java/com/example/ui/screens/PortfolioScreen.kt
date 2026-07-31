@@ -120,7 +120,7 @@ public fun PortfolioScreen(
     ) {
       item {
         Spacer(modifier = Modifier.height(height = 16.dp))
-        // Balance Banner Card
+        
         Box(
           modifier = Modifier
             .fillMaxWidth(fraction = 1.0f)

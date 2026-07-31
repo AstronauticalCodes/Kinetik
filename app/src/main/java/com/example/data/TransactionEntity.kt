@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val timestamp: Long,
-    val type: String, // "BUY", "SELL", "SWAP"
+    val type: String, 
     val fromAsset: String,
     val toAsset: String,
     val fromAmount: Double,

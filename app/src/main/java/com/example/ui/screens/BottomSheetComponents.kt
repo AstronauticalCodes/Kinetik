@@ -62,7 +62,7 @@ public fun OrderConfirmationSheet(
   ModalBottomSheet(
     onDismissRequest = onDismissRequest,
     sheetState = sheetState,
-    containerColor = Color(color = 0xFF0A0A0C).copy(alpha = 0.95f), // Glassmorphic base
+    containerColor = Color(color = 0xFF0A0A0C).copy(alpha = 0.95f), 
     scrimColor = Color.Black.copy(alpha = 0.6f)
   ) {
     Column(

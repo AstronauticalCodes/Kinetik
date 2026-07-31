@@ -88,7 +88,7 @@ public fun TransactionReceiptScreen(
     ) {
       Spacer(modifier = Modifier.height(height = 32.dp))
       
-      // Status Icon
+      
       Box(
         modifier = Modifier
           .size(size = 64.dp)
@@ -114,7 +114,7 @@ public fun TransactionReceiptScreen(
       
       Spacer(modifier = Modifier.height(height = 40.dp))
       
-      // Receipt Details
+      
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
@@ -148,7 +148,7 @@ public fun TransactionReceiptScreen(
       Spacer(modifier = Modifier.weight(weight = 1.0f))
       
       Button(
-        onClick = { /* View on Explorer */ },
+        onClick = {  },
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
           .height(height = 56.dp)

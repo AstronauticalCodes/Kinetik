@@ -75,7 +75,7 @@ public fun AssetDetailScreen(
   val state by viewModel.state.collectAsState()
   val candles by viewModel.candles.collectAsState()
 
-  // Find ticker for current symbol, suffixing with USDT
+  
   val tickerSymbol = "${symbol}USDT"
   val currentTicker = state.tickers.find { it.symbol == tickerSymbol || it.symbol == symbol }
   
@@ -88,7 +88,7 @@ public fun AssetDetailScreen(
   val lowStr = currentTicker?.lowPrice?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "$%,.2f", it) } ?: "$0.00"
   val volStr = currentTicker?.volume?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "%,.2f", it) } ?: "0.00"
 
-  // Trigger klines fetch if not already present
+  
   androidx.compose.runtime.LaunchedEffect(symbol) {
     if (candles[tickerSymbol] == null) {
       viewModel.fetchKlines(tickerSymbol, "1h", 24)
@@ -254,7 +254,7 @@ public fun AssetDetailScreen(
           Spacer(modifier = Modifier.height(height = 24.dp))
         }
         item {
-          // Order Book Placeholder
+          
           Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Text(text = "ORDER BOOK", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
             Spacer(modifier = Modifier.height(height = 12.dp))
@@ -277,7 +277,7 @@ public fun AssetDetailScreen(
           Spacer(modifier = Modifier.height(height = 24.dp))
         }
         item {
-          // Actions
+          
           Row(
             modifier = Modifier
               .fillMaxWidth(fraction = 1.0f)

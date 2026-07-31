@@ -21,8 +21,8 @@ public data class Candle(
 public fun CandlestickChart(
   data: List<Candle>,
   modifier: Modifier = Modifier,
-  bullishColor: Color = Color(0xFF66C285), // Green
-  bearishColor: Color = Color(0xFFFFB4AB)  // Red
+  bullishColor: Color = Color(0xFF66C285), 
+  bearishColor: Color = Color(0xFFFFB4AB)  
 ): Unit {
   Canvas(modifier = modifier.fillMaxSize(fraction = 1.0f)) {
     if (data.isEmpty()) return@Canvas
@@ -44,7 +44,7 @@ public fun CandlestickChart(
       val openY = size.height - ((candle.open - minPrice) / range * size.height)
       val closeY = size.height - ((candle.close - minPrice) / range * size.height)
 
-      // Draw wick
+      
       drawLine(
         color = color,
         start = Offset(x, highY.toFloat()),
@@ -53,10 +53,10 @@ public fun CandlestickChart(
         cap = StrokeCap.Round
       )
 
-      // Draw body
+      
       val topY = min(openY, closeY)
       val bottomY = max(openY, closeY)
-      val bodyHeight = max(bottomY - topY, 2f) // Ensure at least 2px height
+      val bodyHeight = max(bottomY - topY, 2f) 
 
       drawLine(
         color = color,
