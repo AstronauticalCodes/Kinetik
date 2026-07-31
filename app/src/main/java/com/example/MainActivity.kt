@@ -10,16 +10,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.ui.theme.CyberAssetTheme
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.ui.theme.KinetikTheme
 import com.example.ui.navigation.AppNavGraph
 import com.example.ui.navigation.BottomNavigationBar
+import com.example.viewmodel.CryptoViewModel
+import com.example.viewmodel.CryptoViewModelFactory
 
 public class MainActivity : ComponentActivity() {
+  private val viewModel: CryptoViewModel by viewModels { CryptoViewModelFactory(this) }
+
   override fun onCreate(savedInstanceState: Bundle?): Unit {
     super.onCreate(savedInstanceState = savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      CyberAssetTheme {
+      val uiState by viewModel.uiState.collectAsState()
+      KinetikTheme(darkTheme = uiState.isDarkMode) {
         val navController: NavHostController = rememberNavController()
         Scaffold(
           modifier = Modifier.fillMaxSize(fraction = 1.0f),
@@ -29,6 +37,7 @@ public class MainActivity : ComponentActivity() {
         ) { innerPadding ->
           AppNavGraph(
             navController = navController,
+            viewModel = viewModel,
             modifier = Modifier.padding(paddingValues = innerPadding)
           )
         }

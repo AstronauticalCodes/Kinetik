@@ -139,6 +139,14 @@ public class CryptoViewModel(
             }
         }
     }
+
+    public fun toggleDarkMode(): Unit {
+        _uiState.value = _uiState.value.copy(isDarkMode = !_uiState.value.isDarkMode)
+    }
+
+    public fun setDarkMode(enabled: Boolean): Unit {
+        _uiState.value = _uiState.value.copy(isDarkMode = enabled)
+    }
 }
 
 class CryptoViewModelFactory(private val context: android.content.Context) : androidx.lifecycle.ViewModelProvider.Factory {

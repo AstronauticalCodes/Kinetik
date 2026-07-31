@@ -5,50 +5,57 @@ import android.view.Window
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
-private val DarkColorScheme: ColorScheme = darkColorScheme(
-  primary = md_theme_dark_primary,
-  onPrimary = md_theme_dark_onPrimary,
-  primaryContainer = md_theme_dark_primaryContainer,
-  onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-  secondary = md_theme_dark_secondary,
-  onSecondary = md_theme_dark_onSecondary,
-  secondaryContainer = md_theme_dark_secondaryContainer,
-  onSecondaryContainer = md_theme_dark_onSecondaryContainer,
-  tertiary = md_theme_dark_tertiary,
-  onTertiary = md_theme_dark_onTertiary,
-  tertiaryContainer = md_theme_dark_tertiaryContainer,
-  onTertiaryContainer = md_theme_dark_onTertiaryContainer,
-  error = md_theme_dark_error,
-  errorContainer = md_theme_dark_errorContainer,
-  onError = md_theme_dark_onError,
-  onErrorContainer = md_theme_dark_onErrorContainer,
-  background = md_theme_dark_background,
-  onBackground = md_theme_dark_onBackground,
-  surface = md_theme_dark_surface,
-  onSurface = md_theme_dark_onSurface,
-  surfaceVariant = md_theme_dark_surfaceVariant,
-  onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-  outline = md_theme_dark_outline,
-  inverseOnSurface = md_theme_dark_inverseOnSurface,
-  inverseSurface = md_theme_dark_inverseSurface,
-  inversePrimary = md_theme_dark_inversePrimary,
-  surfaceTint = md_theme_dark_surfaceTint,
-  outlineVariant = md_theme_dark_outlineVariant,
-  scrim = md_theme_dark_scrim,
+public val LightColorScheme: ColorScheme = lightColorScheme(
+  primary = KinetikBluePrimary,
+  onPrimary = Color.White,
+  primaryContainer = LightSurfaceVariant,
+  onPrimaryContainer = LightTextPrimary,
+  secondary = KinetikGreenGain,
+  onSecondary = Color.White,
+  background = LightBackground,
+  onBackground = LightTextPrimary,
+  surface = LightSurface,
+  onSurface = LightTextPrimary,
+  surfaceVariant = LightSurfaceVariant,
+  onSurfaceVariant = LightTextSecondary,
+  outline = LightOutline,
+  error = KinetikRedLoss,
+  onError = Color.White
+)
+
+public val DarkColorScheme: ColorScheme = darkColorScheme(
+  primary = KinetikBluePrimary,
+  onPrimary = Color.White,
+  primaryContainer = DarkSurfaceVariant,
+  onPrimaryContainer = DarkTextPrimary,
+  secondary = KinetikGreenGain,
+  onSecondary = Color.White,
+  background = DarkBackground,
+  onBackground = DarkTextPrimary,
+  surface = DarkSurface,
+  onSurface = DarkTextPrimary,
+  surfaceVariant = DarkSurfaceVariant,
+  onSurfaceVariant = DarkTextSecondary,
+  outline = DarkOutline,
+  error = KinetikRedLoss,
+  onError = Color.White
 )
 
 @Composable
-public fun CyberAssetTheme(
+public fun KinetikTheme(
+  darkTheme: Boolean = false,
   content: @Composable () -> Unit
 ): Unit {
-  val colorScheme: ColorScheme = DarkColorScheme
+  val colorScheme: ColorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
   val view: android.view.View = LocalView.current
   if (!view.isInEditMode) {
     SideEffect {
@@ -56,13 +63,24 @@ public fun CyberAssetTheme(
       window.statusBarColor = colorScheme.background.toArgb()
       window.navigationBarColor = colorScheme.background.toArgb()
       val insetsController: WindowInsetsControllerCompat = WindowCompat.getInsetsController(window, view)
-      insetsController.isAppearanceLightStatusBars = false
+      insetsController.isAppearanceLightStatusBars = !darkTheme
+      insetsController.isAppearanceLightNavigationBars = !darkTheme
     }
   }
 
   MaterialTheme(
     colorScheme = colorScheme,
+    shapes = KinetikShapes,
     typography = AppTypography,
     content = content
   )
 }
+
+@Composable
+public fun CyberAssetTheme(
+  darkTheme: Boolean = false,
+  content: @Composable () -> Unit
+): Unit {
+  KinetikTheme(darkTheme = darkTheme, content = content)
+}
+
