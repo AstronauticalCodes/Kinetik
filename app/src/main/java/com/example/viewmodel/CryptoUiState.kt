@@ -14,7 +14,8 @@ data class CryptoUiState(
     val selectedAsset: String? = null,
     val tradeState: TradeState = TradeState.Idle,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val isDarkMode: Boolean = false
 )
 
 sealed interface TradeState {

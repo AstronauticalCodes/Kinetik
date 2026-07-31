@@ -7,12 +7,15 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.viewmodel.CryptoViewModel
 import com.example.ui.screens.DashboardScreen
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 public fun AppNavGraph(
   navController: NavHostController,
+  viewModel: CryptoViewModel = viewModel(),
   modifier: Modifier = Modifier
 ): Unit {
   SharedTransitionLayout {
@@ -61,6 +64,7 @@ public fun AppNavGraph(
       }
       composable(route = "profile") {
         com.example.ui.screens.ProfileScreen(
+          viewModel = viewModel,
           onNavigateToDeposit = { navController.navigate("deposit") },
           onNavigateToSecurity = { navController.navigate("securitySettings") },
           onNavigateToSearch = { navController.navigate("search") }

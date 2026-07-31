@@ -48,15 +48,23 @@ import com.example.ui.theme.primary_fixed_dim
 import com.example.ui.theme.surface_container_high
 import com.example.ui.theme.surface_container_highest
 import com.example.ui.theme.surface_container_low
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.viewmodel.CryptoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun ProfileScreen(
+  viewModel: CryptoViewModel = viewModel(),
   onNavigateToDeposit: () -> Unit = {},
   onNavigateToSecurity: () -> Unit = {},
   onNavigateToSearch: () -> Unit = {},
   modifier: Modifier = Modifier
 ): Unit {
+  val uiState by viewModel.uiState.collectAsState()
+
   Scaffold(
     modifier = modifier.fillMaxSize(fraction = 1.0f),
     topBar = {
@@ -203,6 +211,20 @@ public fun ProfileScreen(
         ) {
           Text(text = "Preferences", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
           Spacer(modifier = Modifier.height(height = 16.dp))
+          Row(
+            modifier = Modifier
+              .fillMaxWidth(fraction = 1.0f)
+              .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(text = "Dark Mode", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
+            Switch(
+              checked = uiState.isDarkMode,
+              onCheckedChange = { viewModel.toggleDarkMode() }
+            )
+          }
+          Spacer(modifier = Modifier.height(height = 12.dp))
           Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(text = "App Preferences", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
             Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
