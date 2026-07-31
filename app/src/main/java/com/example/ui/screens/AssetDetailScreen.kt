@@ -5,9 +5,11 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,21 +23,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CurrencyBitcoin
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,20 +48,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import com.example.ui.components.CandlestickChart
+import com.example.ui.components.OrderBookView
 import com.example.viewmodel.CryptoViewModel
-import com.example.ui.theme.DataLarge
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.secondary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_low
+import com.example.viewmodel.CryptoViewModelFactory
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -67,291 +67,324 @@ public fun AssetDetailScreen(
   sharedTransitionScope: SharedTransitionScope,
   onNavigateBack: () -> Unit,
   modifier: Modifier = Modifier,
-  viewModel: CryptoViewModel = viewModel(factory = com.example.viewmodel.CryptoViewModelFactory(androidx.compose.ui.platform.LocalContext.current))
+  viewModel: CryptoViewModel = viewModel(factory = CryptoViewModelFactory(LocalContext.current))
 ): Unit {
-  var showOrderSheet by remember { mutableStateOf(value = false) }
+  var showOrderSheet by remember { mutableStateOf(false) }
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+  var isFavorite by remember { mutableStateOf(false) }
+  var selectedTimeframe by remember { mutableStateOf("1D") }
 
   val state by viewModel.state.collectAsState()
   val candles by viewModel.candles.collectAsState()
 
-  
   val tickerSymbol = "${symbol}USDT"
   val currentTicker = state.tickers.find { it.symbol == tickerSymbol || it.symbol == symbol }
   
-  val price = currentTicker?.lastPrice?.toFloatOrNull()?.let { String.format(java.util.Locale.US, "%.2f", it) } ?: "64,120.32"
-  val changePct = currentTicker?.priceChangePercent?.toFloatOrNull() ?: 2.4f
-  val changeStr = "${if (changePct >= 0) "+" else ""}${String.format(java.util.Locale.US, "%.2f", changePct)}%"
+  val priceVal = currentTicker?.lastPrice?.toFloatOrNull() ?: 67420.00f
+  val priceStr = String.format(Locale.US, "$%,.2f", priceVal)
+  val changePct = currentTicker?.priceChangePercent?.toFloatOrNull() ?: 2.45f
   val isPositive = changePct >= 0
+  val changeStr = "${if (isPositive) "+" else ""}${String.format(Locale.US, "%.2f", changePct)}%"
+  val changeAmtStr = "${if (isPositive) "+" else ""}${String.format(Locale.US, "$%,.2f", priceVal * (changePct / 100f))}"
 
-  val highStr = currentTicker?.highPrice?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "$%,.2f", it) } ?: "$0.00"
-  val lowStr = currentTicker?.lowPrice?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "$%,.2f", it) } ?: "$0.00"
-  val volStr = currentTicker?.volume?.toDoubleOrNull()?.let { String.format(java.util.Locale.US, "%,.2f", it) } ?: "0.00"
+  val highStr = currentTicker?.highPrice?.toDoubleOrNull()?.let { String.format(Locale.US, "$%,.2f", it) } ?: "$68,240.00"
+  val lowStr = currentTicker?.lowPrice?.toDoubleOrNull()?.let { String.format(Locale.US, "$%,.2f", it) } ?: "$65,820.00"
+  val volStr = currentTicker?.volume?.toDoubleOrNull()?.let { String.format(Locale.US, "$%,.2fB", it / 1_000_000.0) } ?: "$28.4B"
 
-  
-  androidx.compose.runtime.LaunchedEffect(symbol) {
+  val fullName = when (symbol.uppercase(Locale.ROOT)) {
+    "BTC" -> "Bitcoin"
+    "ETH" -> "Ethereum"
+    "SOL" -> "Solana"
+    "BNB" -> "BNB"
+    else -> symbol
+  }
+
+  LaunchedEffect(symbol) {
     if (candles[tickerSymbol] == null) {
       viewModel.fetchKlines(tickerSymbol, "1h", 24)
     }
   }
 
-  with(sharedTransitionScope) {
-    Scaffold(
-      modifier = modifier.fillMaxSize(fraction = 1.0f),
-      topBar = {
-        TopAppBar(
-          title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Box(
-                modifier = Modifier
-                  .size(size = 32.dp)
-                  .clip(shape = CircleShape)
-                  .background(color = primary_fixed_dim.copy(alpha = 0.2f))
-                  .sharedElement(
-                    state = rememberSharedContentState(key = "icon-$symbol"),
-                    animatedVisibilityScope = animatedVisibilityScope
-                  ),
-                contentAlignment = Alignment.Center
-              ) {
-                Icon(
-                  imageVector = Icons.Filled.CurrencyBitcoin,
-                  contentDescription = null,
-                  tint = primary_fixed_dim,
-                  modifier = Modifier.size(size = 18.dp)
-                )
-              }
-              Spacer(modifier = Modifier.width(width = 12.dp))
-              Text(
-                text = symbol,
-                style = MaterialTheme.typography.titleMedium,
-                color = md_theme_dark_onSurface
-              )
-            }
-          },
-          navigationIcon = {
-            IconButton(onClick = onNavigateBack) {
-              Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = md_theme_dark_onSurfaceVariant
-              )
-            }
-          },
-          actions = {
-            val context = androidx.compose.ui.platform.LocalContext.current
-            IconButton(onClick = { android.widget.Toast.makeText(context, "Added to Watchlist", android.widget.Toast.LENGTH_SHORT).show() }) {
-              Icon(
-                imageVector = Icons.Filled.StarBorder,
-                contentDescription = "Star",
-                tint = md_theme_dark_onSurfaceVariant
-              )
-            }
-            var showMenu by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-            IconButton(onClick = { showMenu = true }) {
-              Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = "More",
-                tint = md_theme_dark_onSurfaceVariant
-              )
-              androidx.compose.material3.DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-              ) {
-                androidx.compose.material3.DropdownMenuItem(
-                  text = { Text("Share") },
-                  onClick = { 
-                    showMenu = false
-                    val sendIntent = android.content.Intent().apply {
-                      action = android.content.Intent.ACTION_SEND
-                      putExtra(android.content.Intent.EXTRA_TEXT, "Check out Bitcoin on AI Studio App!")
-                      type = "text/plain"
-                    }
-                    val shareIntent = android.content.Intent.createChooser(sendIntent, null)
-                    context.startActivity(shareIntent)
-                  }
-                )
-                androidx.compose.material3.DropdownMenuItem(
-                  text = { Text("Set Price Alert") },
-                  onClick = { 
-                    showMenu = false
-                    android.widget.Toast.makeText(context, "Price alert set", android.widget.Toast.LENGTH_SHORT).show() 
-                  }
-                )
-                androidx.compose.material3.DropdownMenuItem(
-                  text = { Text("View Project Website") },
-                  onClick = { 
-                    showMenu = false
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://bitcoin.org"))
-                    context.startActivity(intent)
-                  }
-                )
-              }
-            }
-          },
-          colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent
-          )
-        )
-      },
-      containerColor = Color.Transparent
-    ) { innerPadding ->
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxSize(fraction = 1.0f)
-          .padding(paddingValues = innerPadding),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 80.dp)
-      ) {
-        item {
-          Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Spacer(modifier = Modifier.height(height = 8.dp))
+  Scaffold(
+    modifier = modifier.fillMaxSize(),
+    containerColor = Color(0xFFFAFAFA),
+    topBar = {
+      TopAppBar(
+        title = {
+          Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             Text(
-              text = "$$price",
-              style = DataLarge.copy(fontSize = 40.sp),
-              color = Color.White
+              text = fullName,
+              fontSize = 18.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color(0xFF0F172A)
             )
-            Spacer(modifier = Modifier.height(height = 4.dp))
             Text(
-              text = changeStr,
-              style = DataMedium.copy(fontSize = 16.sp),
-              color = if (isPositive) secondary_fixed_dim else Color(color = 0xFFFFB4AB)
+              text = "$symbol / USD",
+              fontSize = 12.sp,
+              color = Color(0xFF64748B)
             )
           }
-          Spacer(modifier = Modifier.height(height = 24.dp))
-        }
-        item {
+        },
+        navigationIcon = {
           Box(
             modifier = Modifier
-              .fillMaxWidth(fraction = 1.0f)
-              .height(height = 280.dp)
-              .padding(horizontal = 16.dp)
-              .background(color = Color(color = 0xFF131315), shape = RoundedCornerShape(size = 24.dp))
-              .border(width = 1.dp, color = Color.White.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 24.dp)),
+              .padding(start = 12.dp)
+              .size(40.dp)
+              .clip(CircleShape)
+              .background(Color(0xFFF0F3FA))
+              .clickable { onNavigateBack() },
             contentAlignment = Alignment.Center
           ) {
-            val assetCandles = candles[tickerSymbol] ?: emptyList()
-            if (assetCandles.isEmpty()) {
-              Text("Loading chart...", color = Color.White.copy(alpha = 0.5f))
-            } else {
-              com.example.ui.components.CandlestickChart(
-                data = assetCandles,
-                modifier = Modifier.padding(16.dp)
+            Icon(
+              imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+              contentDescription = "Back",
+              tint = Color(0xFF0F172A),
+              modifier = Modifier.size(20.dp)
+            )
+          }
+        },
+        actions = {
+          Box(
+            modifier = Modifier
+              .padding(end = 12.dp)
+              .size(40.dp)
+              .clip(CircleShape)
+              .background(Color(0xFFF0F3FA))
+              .clickable { isFavorite = !isFavorite },
+            contentAlignment = Alignment.Center
+          ) {
+            Icon(
+              imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+              contentDescription = "Favorite",
+              tint = if (isFavorite) Color(0xFFEAB308) else Color(0xFF0F172A),
+              modifier = Modifier.size(20.dp)
+            )
+          }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+          containerColor = Color.Transparent
+        )
+      )
+    },
+    bottomBar = {
+      BuySellBottomBar(
+        onBuy = { showOrderSheet = true },
+        onSell = { showOrderSheet = true }
+      )
+    }
+  ) { innerPadding ->
+    LazyColumn(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding),
+      contentPadding = PaddingValues(bottom = 24.dp)
+    ) {
+      // Price Header Display
+      item {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+          Text(
+            text = priceStr,
+            fontSize = 36.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F172A)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = changeAmtStr,
+              fontSize = 14.sp,
+              fontWeight = FontWeight.SemiBold,
+              color = if (isPositive) Color(0xFF22C55E) else Color(0xFFEF4444)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+              modifier = Modifier
+                .clip(CircleShape)
+                .background(if (isPositive) Color(0xFFDCFCE7) else Color(0xFFFEE2E2))
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+              Text(
+                text = changeStr,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isPositive) Color(0xFF22C55E) else Color(0xFFEF4444)
+              )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+              text = "Today",
+              fontSize = 13.sp,
+              color = Color(0xFF64748B)
+            )
+          }
+        }
+      }
+
+      // Candlestick Chart
+      item {
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .height(240.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp))
+            .padding(16.dp)
+        ) {
+          val assetCandles = candles[tickerSymbol] ?: emptyList()
+          CandlestickChart(data = assetCandles)
+        }
+      }
+
+      // Timeframe Selector Pills
+      item {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          listOf("1H", "4H", "1D", "1W", "1M").forEach { tf ->
+            val isSelected = tf == selectedTimeframe
+            Box(
+              modifier = Modifier
+                .weight(1f)
+                .clip(CircleShape)
+                .background(if (isSelected) Color(0xFF2563EB) else Color(0xFFF0F3FA))
+                .clickable { selectedTimeframe = tf }
+                .padding(vertical = 8.dp),
+              contentAlignment = Alignment.Center
+            ) {
+              Text(
+                text = tf,
+                fontSize = 13.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) Color.White else Color(0xFF64748B)
               )
             }
           }
-          Spacer(modifier = Modifier.height(height = 24.dp))
         }
-        item {
+      }
+
+      // 24H Stats Card
+      item {
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFF8FAFC))
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
+            .padding(16.dp)
+        ) {
           Row(
-            modifier = Modifier
-              .fillMaxWidth(fraction = 1.0f)
-              .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(space = 8.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            InfoCard(title = "24H HIGH", value = highStr, modifier = Modifier.weight(weight = 1.0f))
-            InfoCard(title = "24H LOW", value = lowStr, modifier = Modifier.weight(weight = 1.0f))
-            InfoCard(title = "VOL", value = volStr, modifier = Modifier.weight(weight = 1.0f))
-          }
-          Spacer(modifier = Modifier.height(height = 24.dp))
-        }
-        item {
-          
-          Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = "ORDER BOOK", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-            Spacer(modifier = Modifier.height(height = 12.dp))
-            Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween) {
-               Column(modifier = Modifier.weight(weight = 1.0f)) {
-                 Text(text = "BIDS", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = secondary_fixed_dim)
-                 OrderRow(price = "64,120", amount = "0.24", color = secondary_fixed_dim)
-                 OrderRow(price = "64,118", amount = "1.52", color = secondary_fixed_dim)
-                 OrderRow(price = "64,115", amount = "0.84", color = secondary_fixed_dim)
-               }
-               Spacer(modifier = Modifier.width(width = 16.dp))
-               Column(modifier = Modifier.weight(weight = 1.0f)) {
-                 Text(text = "ASKS", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = Color(color = 0xFFFFB4AB))
-                 OrderRow(price = "64,121", amount = "0.11", color = Color(color = 0xFFFFB4AB))
-                 OrderRow(price = "64,124", amount = "2.30", color = Color(color = 0xFFFFB4AB))
-                 OrderRow(price = "64,125", amount = "1.45", color = Color(color = 0xFFFFB4AB))
-               }
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+              Text(text = "24h High", fontSize = 12.sp, color = Color(0xFF64748B))
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(text = highStr, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF22C55E))
             }
-          }
-          Spacer(modifier = Modifier.height(height = 24.dp))
-        }
-        item {
-          
-          Row(
-            modifier = Modifier
-              .fillMaxWidth(fraction = 1.0f)
-              .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(space = 16.dp)
-          ) {
-            Button(
-              onClick = { showOrderSheet = true },
-              modifier = Modifier
-                .weight(weight = 1.0f)
-                .height(height = 56.dp),
-              colors = ButtonDefaults.buttonColors(
-                containerColor = primary_fixed_dim,
-                contentColor = Color(color = 0xFF001F24)
-              ),
-              shape = RoundedCornerShape(size = 12.dp)
-            ) {
-              Text(text = "BUY", style = MaterialTheme.typography.labelLarge)
+            Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFFE2E8F0)))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+              Text(text = "24h Low", fontSize = 12.sp, color = Color(0xFF64748B))
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(text = lowStr, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFEF4444))
             }
-            Button(
-              onClick = { showOrderSheet = true },
-              modifier = Modifier
-                .weight(weight = 1.0f)
-                .height(height = 56.dp),
-              colors = ButtonDefaults.buttonColors(
-                containerColor = surface_container_high,
-                contentColor = md_theme_dark_onSurface
-              ),
-              shape = RoundedCornerShape(size = 12.dp)
-            ) {
-              Text(text = "SELL", style = MaterialTheme.typography.labelLarge)
+            Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFFE2E8F0)))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+              Text(text = "Volume", fontSize = 12.sp, color = Color(0xFF64748B))
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(text = volStr, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
             }
           }
         }
       }
-      
-      if (showOrderSheet) {
-        OrderConfirmationSheet(
-          sheetState = sheetState,
-          onDismissRequest = { showOrderSheet = false },
-          onConfirm = { showOrderSheet = false },
-          asset = symbol,
-          amount = "0.01",
-          price = "$64,120.32",
-          total = "$641.20"
-        )
+
+      // Order Book View
+      item {
+        Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
+          OrderBookView(symbol = symbol)
+        }
       }
+    }
+
+    if (showOrderSheet) {
+      OrderConfirmationSheet(
+        sheetState = sheetState,
+        onDismissRequest = { showOrderSheet = false },
+        onConfirm = { showOrderSheet = false },
+        asset = symbol,
+        amount = "0.01",
+        price = priceStr,
+        total = String.format(Locale.US, "$%,.2f", priceVal * 0.01f)
+      )
     }
   }
 }
 
 @Composable
-public fun InfoCard(title: String, value: String, modifier: Modifier = Modifier): Unit {
-  Column(
-    modifier = modifier
-      .background(color = Color.White.copy(alpha = 0.03f), shape = RoundedCornerShape(size = 12.dp))
-      .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f), shape = RoundedCornerShape(size = 12.dp))
-      .padding(all = 12.dp)
-  ) {
-    Text(text = title, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = Color.White.copy(alpha = 0.4f))
-    Spacer(modifier = Modifier.height(height = 4.dp))
-    Text(text = value, style = DataMedium.copy(fontSize = 14.sp), color = Color.White)
-  }
-}
-
-@Composable
-public fun OrderRow(price: String, amount: String, color: Color): Unit {
-  Row(
+fun BuySellBottomBar(
+  onBuy: () -> Unit,
+  onSell: () -> Unit
+) {
+  Box(
     modifier = Modifier
-      .fillMaxWidth(fraction = 1.0f)
-      .padding(vertical = 4.dp),
-    horizontalArrangement = Arrangement.SpaceBetween
+      .fillMaxWidth()
+      .background(Color.White)
+      .border(1.dp, Color(0xFFF1F5F9))
+      .padding(horizontal = 20.dp, vertical = 12.dp)
   ) {
-    Text(text = price, style = DataMedium.copy(fontSize = 12.sp), color = color)
-    Text(text = amount, style = DataMedium.copy(fontSize = 12.sp), color = md_theme_dark_onSurfaceVariant)
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+      Button(
+        onClick = onBuy,
+        modifier = Modifier
+          .weight(1f)
+          .height(52.dp),
+        colors = ButtonDefaults.buttonColors(
+          containerColor = Color(0xFF009E60),
+          contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(16.dp)
+      ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Icon(
+            imageVector = Icons.Default.ArrowUpward,
+            contentDescription = "Buy",
+            modifier = Modifier.size(18.dp)
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(text = "Buy", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+      }
+
+      Button(
+        onClick = onSell,
+        modifier = Modifier
+          .weight(1f)
+          .height(52.dp),
+        colors = ButtonDefaults.buttonColors(
+          containerColor = Color(0xFFD92D20),
+          contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(16.dp)
+      ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Icon(
+            imageVector = Icons.Default.ArrowDownward,
+            contentDescription = "Sell",
+            modifier = Modifier.size(18.dp)
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(text = "Sell", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+      }
+    }
   }
 }
