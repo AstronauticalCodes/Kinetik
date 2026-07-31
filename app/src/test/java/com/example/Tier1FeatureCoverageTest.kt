@@ -76,7 +76,7 @@ class Tier1FeatureCoverageTest {
             "ETH" to 3000.0
         )
 
-        // Expected Net Worth: 50,000 + (0.5 * 60,000) + (4.0 * 3,000) = 50,000 + 30,000 + 12,000 = 92,000 USD
+        
         val netWorth = repository.calculateNetWorth(holdings, currentPrices)
         assertEquals(92000.0, netWorth, 0.001)
     }
@@ -92,10 +92,10 @@ class Tier1FeatureCoverageTest {
 
         val sorted = repository.getTopMovers(tickers)
 
-        assertEquals("ETHUSDT", sorted[0].symbol)  // 12.8%
-        assertEquals("DOGEUSDT", sorted[1].symbol) // 8.1%
-        assertEquals("BTCUSDT", sorted[2].symbol)  // 2.5%
-        assertEquals("SOLUSDT", sorted[3].symbol)  // -3.2%
+        assertEquals("ETHUSDT", sorted[0].symbol)  
+        assertEquals("DOGEUSDT", sorted[1].symbol) 
+        assertEquals("BTCUSDT", sorted[2].symbol)  
+        assertEquals("SOLUSDT", sorted[3].symbol)  
     }
 
     @Test

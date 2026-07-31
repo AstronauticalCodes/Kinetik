@@ -108,7 +108,7 @@ public fun ProfileScreen(
     ) {
       item {
         Spacer(modifier = Modifier.height(height = 16.dp))
-        // User Profile Card
+        
         Column(
           modifier = Modifier
             .fillMaxWidth(fraction = 1.0f)
@@ -143,7 +143,7 @@ public fun ProfileScreen(
         Spacer(modifier = Modifier.height(height = 16.dp))
       }
       item {
-        // Quick Action Grid
+        
         Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
           Column(
             modifier = Modifier
@@ -197,7 +197,7 @@ public fun ProfileScreen(
         Spacer(modifier = Modifier.height(height = 24.dp))
       }
       item {
-        // Settings List
+        
         Column(
           modifier = Modifier.fillMaxWidth(fraction = 1.0f).background(color = surface_container_low, shape = RoundedCornerShape(size = 16.dp)).padding(all = 16.dp)
         ) {

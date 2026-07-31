@@ -501,7 +501,7 @@ public fun WatchlistSection(
         val sparklineData = assetCandles.map { it.close }
 
         WatchlistItem(
-          name = symbol, // simplified name for now
+          name = symbol, 
           symbol = symbol,
           price = "$$price",
           change = changeStr,
@@ -563,7 +563,7 @@ public fun WatchlistItem(
         }
       }
       
-      // Sparkline placeholder
+      
       Box(
         modifier = Modifier
           .weight(weight = 1.0f)

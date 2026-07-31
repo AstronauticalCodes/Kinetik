@@ -85,7 +85,7 @@ public fun DepositScreen(
     ) {
       Spacer(modifier = Modifier.height(height = 16.dp))
       
-      // Network Selector Placeholder
+      
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
@@ -107,7 +107,7 @@ public fun DepositScreen(
       
       Spacer(modifier = Modifier.height(height = 32.dp))
 
-      // QR Code
+      
       Box(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
@@ -125,7 +125,7 @@ public fun DepositScreen(
       
       Spacer(modifier = Modifier.height(height = 32.dp))
 
-      // Wallet Address
+      
       Text(text = "WALLET ADDRESS", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
       Spacer(modifier = Modifier.height(height = 8.dp))
       Row(

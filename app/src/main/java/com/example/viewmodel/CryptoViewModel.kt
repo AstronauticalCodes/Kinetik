@@ -39,7 +39,7 @@ public class CryptoViewModel(
     init {
         startStreaming()
         topAssets.forEach { symbol ->
-            fetchKlines(symbol, "1d", 7) // 7 days of daily candles for sparklines
+            fetchKlines(symbol, "1d", 7) 
         }
         observeRepository()
     }
@@ -111,7 +111,7 @@ public class CryptoViewModel(
                 } catch (e: Exception) {
                     _state.value = _state.value.copy(error = e.message, isLoading = false)
                 }
-                delay(5000) // update every 5 seconds
+                delay(5000) 
             }
         }
     }
@@ -135,7 +135,7 @@ public class CryptoViewModel(
                     put(symbol, candleList)
                 }
             } catch (e: Exception) {
-                // handle error silently
+                
             }
         }
     }

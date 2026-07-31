@@ -185,7 +185,7 @@ public fun TradeScreen(
     ) {
       Spacer(modifier = Modifier.height(height = 16.dp))
       
-      // Pay From Box
+      
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
@@ -242,7 +242,7 @@ public fun TradeScreen(
         }
       }
       
-      // Swap Icon Toggle Button
+      
       Box(
         modifier = Modifier.fillMaxWidth(fraction = 1.0f).height(height = 0.dp),
         contentAlignment = Alignment.Center
@@ -262,7 +262,7 @@ public fun TradeScreen(
          }
       }
 
-      // Receive To Box
+      
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
@@ -339,7 +339,7 @@ public fun TradeScreen(
 
       Spacer(modifier = Modifier.weight(weight = 1.0f))
 
-      // Keypad Input Buttons
+      
       Column(
         modifier = Modifier.fillMaxWidth(fraction = 1.0f),
         verticalArrangement = Arrangement.spacedBy(space = 8.dp)
@@ -368,7 +368,7 @@ public fun TradeScreen(
 
       Spacer(modifier = Modifier.height(height = 16.dp))
 
-      // Swipe to Swap / Swap Action Button
+      
       Box(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)

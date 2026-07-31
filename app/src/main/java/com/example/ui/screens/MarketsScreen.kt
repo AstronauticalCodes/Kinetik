@@ -183,7 +183,7 @@ public fun MarketsScreen(
           }
         }
         
-        // Market News Feed
+        
         LazyRow(
           modifier = Modifier
             .fillMaxWidth(fraction = 1.0f)
@@ -234,7 +234,7 @@ public fun MarketsScreen(
 
               MarketAssetRow(
                 symbol = symbol,
-                name = symbol, // Use symbol as name for simplicity unless we map them
+                name = symbol, 
                 price = "$$price",
                 change = changeStr,
                 isPositive = isPositive,
@@ -326,7 +326,7 @@ public fun MarketAssetRow(
         }
       }
       
-      // Sparkline placeholder
+      
       Box(
         modifier = Modifier
           .weight(weight = 1.0f)

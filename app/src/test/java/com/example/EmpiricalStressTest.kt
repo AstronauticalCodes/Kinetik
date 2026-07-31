@@ -42,9 +42,9 @@ class EmpiricalStressTest {
         database.close()
     }
 
-    // ----------------------------------------------------------------------------------
-    // 1. DYNAMIC NET WORTH CALCULATION ACROSS EXTREME PRICE SWINGS
-    // ----------------------------------------------------------------------------------
+    
+    
+    
 
     @Test
     fun testNetWorthCalculation_ExtremeCrash_BtcDropsToOneDollar() {
@@ -53,13 +53,13 @@ class EmpiricalStressTest {
             HoldingEntity("BTC", "Bitcoin", 0.5, 65000.0, isFiat = false),
             HoldingEntity("ETH", "Ethereum", 4.0, 3500.0, isFiat = false)
         )
-        // BTC crashes to $1.0, ETH stays at $3,500
+        
         val extremeCrashPrices = mapOf(
             "BTC" to 1.0,
             "ETH" to 3500.0
         )
 
-        // Expected Net Worth: 50,000 + (0.5 * 1.0) + (4.0 * 3500.0) = 50,000 + 0.5 + 14,000 = 64,000.5 USD
+        
         val netWorth = repository.calculateNetWorth(holdings, extremeCrashPrices)
         assertEquals(64000.5, netWorth, 0.001)
     }
@@ -71,13 +71,13 @@ class EmpiricalStressTest {
             HoldingEntity("BTC", "Bitcoin", 0.5, 65000.0, isFiat = false),
             HoldingEntity("ETH", "Ethereum", 4.0, 3500.0, isFiat = false)
         )
-        // BTC surges to $1,000,000.0, ETH to $10,000.0
+        
         val extremeSurgePrices = mapOf(
             "BTC" to 1000000.0,
             "ETH" to 10000.0
         )
 
-        // Expected Net Worth: 50,000 + (0.5 * 1,000,000) + (4.0 * 10,000) = 50,000 + 500,000 + 40,000 = 590,000 USD
+        
         val netWorth = repository.calculateNetWorth(holdings, extremeSurgePrices)
         assertEquals(590000.0, netWorth, 0.001)
     }
@@ -94,7 +94,7 @@ class EmpiricalStressTest {
             "PEPE" to 0.0000085
         )
 
-        // Expected Net Worth: 100 + (1,000,000 * 0.000025 = 25) + (10,000,000 * 0.0000085 = 85) = 210 USD
+        
         val netWorth = repository.calculateNetWorth(holdings, microPrices)
         assertEquals(210.0, netWorth, 0.0001)
     }
@@ -106,12 +106,12 @@ class EmpiricalStressTest {
             HoldingEntity("BTC", "Bitcoin", 2.0, 50000.0, isFiat = false),
             HoldingEntity("ALT", "Altcoin", 100.0, 15.0, isFiat = false)
         )
-        // Price map does not contain ALT or ALTUSDT
+        
         val partialPrices = mapOf(
             "BTC" to 60000.0
         )
 
-        // Expected Net Worth: 1,000 + (2.0 * 60,000 = 120,000) + (100.0 * 15.0 [fallback avgBuyPriceUsd] = 1,500) = 122,500 USD
+        
         val netWorth = repository.calculateNetWorth(holdings, partialPrices)
         assertEquals(122500.0, netWorth, 0.001)
     }
@@ -121,7 +121,7 @@ class EmpiricalStressTest {
         val holdings = listOf(
             HoldingEntity("BTC", "Bitcoin", 1.0, 50000.0, isFiat = false)
         )
-        // Prices map contains ticker pair symbol "BTCUSDT" instead of base symbol "BTC"
+        
         val suffixPrices = mapOf(
             "BTCUSDT" to 75000.0
         )
@@ -130,9 +130,9 @@ class EmpiricalStressTest {
         assertEquals(75000.0, netWorth, 0.001)
     }
 
-    // ----------------------------------------------------------------------------------
-    // 2. TOP MOVERS SORTING UNDER POSITIVE, NEGATIVE, ZERO, AND MISSING/EMPTY FIELDS
-    // ----------------------------------------------------------------------------------
+    
+    
+    
 
     @Test
     fun testTopMoversSorting_PositiveNegativeZeroAndInvalidPercent() {
@@ -148,14 +148,14 @@ class EmpiricalStressTest {
 
         val sorted = repository.getTopMovers(tickers)
 
-        // Verify size
+        
         assertEquals(7, sorted.size)
 
-        // Verify order: 150.5% > 12.3% > 0.0% / empty (0.0) / malformed (0.0) > -1.5% > -45.8%
+        
         assertEquals("TOKEN_POS_HIGH", sorted[0].symbol)
         assertEquals("TOKEN_POS_MED", sorted[1].symbol)
 
-        // The next three should be the ones mapping to 0.0 (TOKEN_ZERO, TOKEN_EMPTY, TOKEN_MALFORMED)
+        
         val middlePcts = sorted.subList(2, 5).map { it.priceChangePercent.toDoubleOrNull() ?: 0.0 }
         assertTrue(middlePcts.all { it == 0.0 })
 
@@ -173,9 +173,9 @@ class EmpiricalStressTest {
 
         val sorted = repository.getTopMovers(tickers)
 
-        assertEquals("COIN_C", sorted[0].symbol) // -0.1%
-        assertEquals("COIN_A", sorted[1].symbol) // -5.0%
-        assertEquals("COIN_B", sorted[2].symbol) // -40.0%
+        assertEquals("COIN_C", sorted[0].symbol) 
+        assertEquals("COIN_A", sorted[1].symbol) 
+        assertEquals("COIN_B", sorted[2].symbol) 
     }
 
     @Test
@@ -184,9 +184,9 @@ class EmpiricalStressTest {
         assertTrue(sorted.isEmpty())
     }
 
-    // ----------------------------------------------------------------------------------
-    // 3. ASSET DETAIL 24H HIGH/LOW PARSING AND FALLBACK HANDLING
-    // ----------------------------------------------------------------------------------
+    
+    
+    
 
     @Test
     fun testAssetDetail24HHighLow_ValidParsingAndFormatting() {
@@ -266,7 +266,7 @@ class EmpiricalStressTest {
         assertNull(lowVal)
         assertNull(volVal)
 
-        // Verify fallback matching UI implementation logic:
+        
         val highStr = highVal?.let { String.format(Locale.US, "$%,.2f", it) } ?: "$0.00"
         val lowStr = lowVal?.let { String.format(Locale.US, "$%,.2f", it) } ?: "$0.00"
         val volStr = volVal?.let { String.format(Locale.US, "%,.2f", it) } ?: "0.00"

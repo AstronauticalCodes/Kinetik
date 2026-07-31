@@ -29,7 +29,7 @@ public fun Sparkline(
     val path = Path()
     data.forEachIndexed { index, value ->
       val x = index * stepX
-      // If range is 0 (all values same), center vertically
+      
       val y = if (range == 0f) size.height / 2 else size.height - ((value - min) / range * size.height)
       
       if (index == 0) {

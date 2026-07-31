@@ -108,7 +108,7 @@ public fun TransactionHistoryScreen(
         .fillMaxSize(fraction = 1.0f)
         .padding(paddingValues = innerPadding)
     ) {
-      // Filter Chips Placeholder
+      
       LazyRow(
         modifier = Modifier.fillMaxWidth(fraction = 1.0f).padding(vertical = 8.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
