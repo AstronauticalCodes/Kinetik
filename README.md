@@ -22,11 +22,11 @@
 <!-- Replace these with actual screenshot paths -->
 | Dashboard | Markets | Asset Detail |
 |:-:|:-:|:-:|
-| <img src="assets/screenshots/dashboard.png" width="250"/> | <img src="assets/screenshots/markets.png" width="250"/> | <img src="assets/screenshots/asset_detail.png" width="250"/> |
+| <img src="https://github.com/user-attachments/assets/bfd5a64d-76d6-4c89-88c5-86fb2ab9f1fb" width="250"/> | <img src="https://github.com/user-attachments/assets/6970979f-0f9a-4e2e-a559-74d0ecbbd77e" width="250"/> | <img src="https://github.com/user-attachments/assets/61c089b2-d7c1-44a7-84fc-94fa599d5dda" width="250"/> |
 
-| Portfolio | Trade | Transaction History |
+| Portfolio | Trade | Transaction Receipt |
 |:-:|:-:|:-:|
-| <img src="assets/screenshots/portfolio.png" width="250"/> | <img src="assets/screenshots/trade.png" width="250"/> | <img src="assets/screenshots/transaction_history.png" width="250"/> |
+| <img src="https://github.com/user-attachments/assets/c8574b38-81c1-4a9c-814a-90cb60649c5a" width="250"/> | <img src="https://github.com/user-attachments/assets/2790d516-40cc-40fa-b9c0-4d6fc596dde8" width="250"/> | <img src="https://github.com/user-attachments/assets/83361d5e-971c-43d7-a89e-3548ccb48f7f" width="250"/> |
 
 </div>
 
