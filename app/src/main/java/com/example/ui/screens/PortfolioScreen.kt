@@ -19,15 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.CurrencyBitcoin
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,23 +31,21 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ui.theme.DataLarge
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.md_theme_dark_primaryContainer
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.secondary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_low
+import com.example.ui.components.AssetBadge
+import com.example.ui.components.DonutChart
+import com.example.ui.components.DonutSegment
 import com.example.viewmodel.CryptoViewModel
 import com.example.viewmodel.CryptoViewModelFactory
 import java.util.Locale
@@ -65,43 +59,59 @@ public fun PortfolioScreen(
   viewModel: CryptoViewModel = viewModel(factory = CryptoViewModelFactory(LocalContext.current))
 ): Unit {
   val uiState by viewModel.uiState.collectAsState()
+  var selectedTimeframe by remember { mutableStateOf("1M") }
 
   val totalNetWorth = uiState.totalNetWorth
   val dailyPnl = uiState.dailyPnl
 
   Scaffold(
-    modifier = modifier.fillMaxSize(fraction = 1.0f),
+    modifier = modifier.fillMaxSize(),
+    containerColor = Color(0xFFFAFAFA),
     topBar = {
       TopAppBar(
         title = {
-          Text(
-            text = "PORTFOLIO",
-            style = MaterialTheme.typography.headlineMedium,
-            color = md_theme_dark_primaryContainer,
-            letterSpacing = 2.sp
-          )
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(end = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(
+              text = "Analytics",
+              fontSize = 28.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color(0xFF0F172A)
+            )
+            // Timeframe Selector Pills
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+              listOf("1W", "1M", "3M", "ALL").forEach { tf ->
+                val isSelected = tf == selectedTimeframe
+                Box(
+                  modifier = Modifier
+                    .clip(CircleShape)
+                    .background(if (isSelected) Color(0xFF1E60F9) else Color(0xFFF0F3FA))
+                    .clickable { selectedTimeframe = tf }
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text(
+                    text = tf,
+                    fontSize = 12.sp,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                    color = if (isSelected) Color.White else Color(0xFF64748B)
+                  )
+                }
+              }
+            }
+          }
         },
         actions = {
           IconButton(onClick = onNavigateToHistory) {
             Icon(
-              imageVector = Icons.Filled.History,
+              imageVector = Icons.Default.History,
               contentDescription = "History",
-              tint = md_theme_dark_onSurfaceVariant
-            )
-          }
-          Box(
-            modifier = Modifier
-              .padding(end = 16.dp)
-              .size(size = 32.dp)
-              .clip(shape = CircleShape)
-              .background(color = primary_fixed_dim),
-            contentAlignment = Alignment.Center
-          ) {
-            Icon(
-              imageVector = Icons.Filled.Person,
-              contentDescription = "User",
-              tint = Color(color = 0xFF001F24),
-              modifier = Modifier.size(size = 18.dp)
+              tint = Color(0xFF0F172A)
             )
           }
         },
@@ -109,150 +119,148 @@ public fun PortfolioScreen(
           containerColor = Color.Transparent
         )
       )
-    },
-    containerColor = Color.Transparent
+    }
   ) { innerPadding ->
     LazyColumn(
       modifier = Modifier
-        .fillMaxSize(fraction = 1.0f)
-        .padding(paddingValues = innerPadding),
-      contentPadding = PaddingValues(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 24.dp)
+        .fillMaxSize()
+        .padding(innerPadding),
+      contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 32.dp)
     ) {
+      // Asset Allocation Card
       item {
-        Spacer(modifier = Modifier.height(height = 16.dp))
-        
         Box(
           modifier = Modifier
-            .fillMaxWidth(fraction = 1.0f)
-            .height(height = 240.dp)
-            .background(color = surface_container_low.copy(alpha = 0.5f), shape = RoundedCornerShape(size = 16.dp)),
-          contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp))
+            .padding(20.dp)
         ) {
-          Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "BALANCE", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+          Column {
             Text(
-              text = if (totalNetWorth > 0) String.format(Locale.US, "$%,.2f", totalNetWorth) else "$0.00",
-              style = DataLarge.copy(fontSize = 32.sp),
-              color = md_theme_dark_primaryContainer
+              text = "Asset Allocation",
+              fontSize = 16.sp,
+              fontWeight = FontWeight.SemiBold,
+              color = Color(0xFF0F172A)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val donutSegments = listOf(
+              DonutSegment("BTC", 45f, "$64,276", Color(0xFF1E60F9)),
+              DonutSegment("ETH", 25f, "$35,709", Color(0xFF10B981)),
+              DonutSegment("SOL", 15f, "$21,425", Color(0xFFF59E0B)),
+              DonutSegment("Others", 15f, "$21,425", Color(0xFF8B5CF6))
+            )
+
+            val totalStr = if (totalNetWorth > 0) "$${(totalNetWorth / 1000).toInt()}K" else "$142K"
+
+            DonutChart(
+              segments = donutSegments,
+              centerValue = totalStr,
+              centerLabel = "Portfolio"
             )
           }
         }
-        Spacer(modifier = Modifier.height(height = 24.dp))
       }
+
+      // 2x2 Stats Grid
       item {
-        Row(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          horizontalArrangement = Arrangement.spacedBy(space = 8.dp)
-        ) {
-          Column(
-            modifier = Modifier
-              .weight(weight = 2.0f)
-              .background(color = surface_container_high, shape = RoundedCornerShape(size = 8.dp))
-              .padding(all = 16.dp)
-          ) {
-             Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween) {
-               Text(text = "Net Worth (USD)", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-               Icon(imageVector = Icons.Filled.AccountBalanceWallet, contentDescription = null, tint = primary_fixed_dim, modifier = Modifier.size(size = 18.dp))
-             }
-             Spacer(modifier = Modifier.height(height = 4.dp))
-             Row(verticalAlignment = Alignment.Bottom) {
-               Text(
-                 text = if (totalNetWorth > 0) String.format(Locale.US, "$%,.2f", totalNetWorth) else "$0.00",
-                 style = DataLarge.copy(fontSize = 24.sp),
-                 color = primary_fixed_dim
-               )
-               Spacer(modifier = Modifier.width(width = 8.dp))
-               val pnlPct = if (totalNetWorth > 0) (dailyPnl / totalNetWorth) * 100 else 0.0
-               Text(
-                 text = String.format(Locale.US, "%+.1f%%", pnlPct),
-                 style = DataMedium,
-                 color = if (pnlPct >= 0) secondary_fixed_dim else Color(0xFFFFB4AB)
-               )
-             }
+        Spacer(modifier = Modifier.height(12.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          val pnlPct = if (totalNetWorth > 0) (dailyPnl / totalNetWorth) * 100 else 2.33
+          val formattedNetWorthStr = if (totalNetWorth > 0) String.format(Locale.US, "$%,.0f", totalNetWorth) else "$142,836"
+          val formattedDailyPnlStr = "${if (dailyPnl >= 0) "+" else ""}${String.format(Locale.US, "$%,.0f", dailyPnl)}"
+
+          Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(
+              title = "Total Value",
+              value = formattedNetWorthStr,
+              subtitle = "+$3,248 today",
+              isPositive = true,
+              modifier = Modifier.weight(1f)
+            )
+            StatCard(
+              title = "24h P&L",
+              value = formattedDailyPnlStr,
+              subtitle = String.format(Locale.US, "%+.2f%%", pnlPct),
+              isPositive = dailyPnl >= 0,
+              modifier = Modifier.weight(1f)
+            )
+          }
+          Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatCard(
+              title = "All-Time P&L",
+              value = "+$42,836",
+              subtitle = "+42.8%",
+              isPositive = true,
+              modifier = Modifier.weight(1f)
+            )
+            StatCard(
+              title = "Avg Buy Price",
+              value = "$58,240",
+              subtitle = "BTC",
+              isPositive = true,
+              modifier = Modifier.weight(1f)
+            )
           }
         }
-        Spacer(modifier = Modifier.height(height = 8.dp))
-        Row(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          horizontalArrangement = Arrangement.spacedBy(space = 8.dp)
-        ) {
-          Column(
-            modifier = Modifier
-              .weight(weight = 1.0f)
-              .background(color = surface_container_low, shape = RoundedCornerShape(size = 8.dp))
-              .padding(all = 16.dp)
-          ) {
-             Text(text = "Daily PNL", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-             Spacer(modifier = Modifier.height(height = 4.dp))
-             Text(
-               text = "${if (dailyPnl >= 0) "+" else ""}${String.format(Locale.US, "$%,.2f", dailyPnl)}",
-               style = DataMedium,
-               color = if (dailyPnl >= 0) secondary_fixed_dim else Color(0xFFFFB4AB)
-             )
-          }
-          Column(
-            modifier = Modifier
-              .weight(weight = 1.0f)
-              .background(color = surface_container_low, shape = RoundedCornerShape(size = 8.dp))
-              .padding(all = 16.dp)
-          ) {
-             Text(text = "All Time PNL", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-             Spacer(modifier = Modifier.height(height = 4.dp))
-             Text(text = "+$42,890.11", style = DataMedium, color = secondary_fixed_dim)
-          }
-        }
-        Spacer(modifier = Modifier.height(height = 24.dp))
       }
+
+      // Holdings Section
       item {
-        Row(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Text(text = "CURRENT HOLDINGS", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "EDIT", style = MaterialTheme.typography.labelSmall, color = primary_fixed_dim)
-            Spacer(modifier = Modifier.width(width = 4.dp))
-            Icon(imageVector = Icons.Filled.Edit, contentDescription = "Edit", tint = primary_fixed_dim, modifier = Modifier.size(size = 14.dp))
-          }
-        }
-        Spacer(modifier = Modifier.height(height = 16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+          text = "Holdings",
+          fontSize = 18.sp,
+          fontWeight = FontWeight.Bold,
+          color = Color(0xFF0F172A),
+          modifier = Modifier.padding(bottom = 12.dp)
+        )
       }
 
       if (uiState.holdings.isEmpty()) {
         item {
-          Text("No holdings yet", color = Color.White.copy(alpha = 0.5f))
+          Box(
+            modifier = Modifier
+              .fillMaxWidth()
+              .clip(RoundedCornerShape(16.dp))
+              .background(Color.White)
+              .padding(24.dp),
+            contentAlignment = Alignment.Center
+          ) {
+            Text(text = "No holdings yet", color = Color(0xFF64748B))
+          }
         }
       } else {
-        items(count = uiState.holdings.size) { index ->
+        items(uiState.holdings.size) { index ->
           val holding = uiState.holdings[index]
           val ticker = uiState.tickers.find {
             it.symbol == "${holding.assetSymbol}USDT" || it.symbol == holding.assetSymbol
           }
           val currentPrice = if (holding.isFiat) 1.0 else (ticker?.lastPrice?.toDoubleOrNull() ?: holding.avgBuyPriceUsd)
           val value = holding.amount * currentPrice
-          val changePct = ticker?.priceChangePercent?.toDoubleOrNull() ?: 0.0
+          val changePct = ticker?.priceChangePercent?.toDoubleOrNull() ?: 2.45
           val isPositive = changePct >= 0
-          val changeStr = "${if (isPositive) "+" else ""}${String.format(Locale.US, "%.2f", changePct)}%"
-          val priceStr = String.format(Locale.US, "$%,.2f", currentPrice)
-          val valueStr = String.format(Locale.US, "$%,.2f", value)
-          val amountStr = "${String.format(Locale.US, "%.4f", holding.amount)} ${holding.assetSymbol}"
-          val avgBuyStr = String.format(Locale.US, "$%,.2f", holding.avgBuyPriceUsd)
+          val valueStr = String.format(Locale.US, "$%,.0f", value)
+          val amountStr = "${String.format(Locale.US, "%.3f", holding.amount)} ${holding.assetSymbol}"
           val roiValue = (currentPrice - holding.avgBuyPriceUsd) * holding.amount
-          val roiStr = "${if (roiValue >= 0) "+" else ""}${String.format(Locale.US, "$%,.2f", roiValue)}"
+          val pnlStr = "${if (roiValue >= 0) "+" else ""}${String.format(Locale.US, "$%,.0f", roiValue)}"
 
-          HoldingItem(
+          val allocationFraction = if (totalNetWorth > 0) (value / totalNetWorth).toFloat().coerceIn(0f, 1f) else 0.45f
+
+          HoldingCard(
+            symbol = holding.assetSymbol,
             name = holding.name,
             amount = amountStr,
-            price = priceStr,
-            change = changeStr,
-            avgBuy = avgBuyStr,
-            roi = roiStr,
             value = valueStr,
+            pnl = pnlStr,
+            allocationFraction = allocationFraction,
             isPositive = isPositive,
             onClick = { onNavigateToAsset(holding.assetSymbol) }
           )
-          Spacer(modifier = Modifier.height(height = 8.dp))
+          Spacer(modifier = Modifier.height(12.dp))
         }
       }
     }
@@ -260,75 +268,115 @@ public fun PortfolioScreen(
 }
 
 @Composable
-public fun HoldingItem(
+fun StatCard(
+  title: String,
+  value: String,
+  subtitle: String,
+  isPositive: Boolean,
+  modifier: Modifier = Modifier
+) {
+  Box(
+    modifier = modifier
+      .clip(RoundedCornerShape(16.dp))
+      .background(Color.White)
+      .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(16.dp))
+      .padding(16.dp)
+  ) {
+    Column {
+      Text(
+        text = title,
+        fontSize = 12.sp,
+        color = Color(0xFF64748B)
+      )
+      Spacer(modifier = Modifier.height(6.dp))
+      Text(
+        text = value,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color(0xFF0F172A)
+      )
+      Spacer(modifier = Modifier.height(4.dp))
+      Text(
+        text = subtitle,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = if (isPositive) Color(0xFF10B981) else Color(0xFFEF4444)
+      )
+    }
+  }
+}
+
+@Composable
+fun HoldingCard(
+  symbol: String,
   name: String,
   amount: String,
-  price: String,
-  change: String,
-  avgBuy: String,
-  roi: String,
   value: String,
-  isPositive: Boolean = true,
-  onClick: () -> Unit = {}
-): Unit {
-  Column(
+  pnl: String,
+  allocationFraction: Float,
+  isPositive: Boolean,
+  onClick: () -> Unit
+) {
+  Box(
     modifier = Modifier
-      .fillMaxWidth(fraction = 1.0f)
-      .background(color = surface_container_low.copy(alpha = 0.8f), shape = RoundedCornerShape(size = 12.dp))
+      .fillMaxWidth()
+      .clip(RoundedCornerShape(16.dp))
+      .background(Color.White)
+      .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(16.dp))
       .clickable { onClick() }
-      .padding(all = 16.dp)
+      .padding(16.dp)
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-          modifier = Modifier
-            .size(size = 40.dp)
-            .clip(shape = CircleShape)
-            .background(color = Color(color = 0xFFF7931A).copy(alpha = 0.2f)),
-          contentAlignment = Alignment.Center
-        ) {
-          Icon(
-            imageVector = Icons.Filled.CurrencyBitcoin,
-            contentDescription = null,
-            tint = Color(color = 0xFFF7931A),
-            modifier = Modifier.size(size = 24.dp)
+    Column {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          AssetBadge(symbol = symbol)
+          Spacer(modifier = Modifier.width(12.dp))
+          Column {
+            Text(
+              text = name,
+              fontSize = 15.sp,
+              fontWeight = FontWeight.Bold,
+              color = Color(0xFF0F172A)
+            )
+            Text(
+              text = amount,
+              fontSize = 12.sp,
+              color = Color(0xFF64748B)
+            )
+          }
+        }
+        Column(horizontalAlignment = Alignment.End) {
+          Text(
+            text = value,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F172A)
+          )
+          Text(
+            text = pnl,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isPositive) Color(0xFF10B981) else Color(0xFFEF4444)
           )
         }
-        Spacer(modifier = Modifier.width(width = 16.dp))
-        Column {
-          Text(text = name, style = DataMedium.copy(fontSize = 16.sp), color = md_theme_dark_onSurface)
-          Text(text = amount, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = md_theme_dark_onSurfaceVariant)
-        }
       }
-      Column(horizontalAlignment = Alignment.End) {
-        Text(text = price, style = DataMedium, color = md_theme_dark_onSurface)
-        Text(text = change, style = DataMedium.copy(fontSize = 12.sp), color = if (isPositive) secondary_fixed_dim else Color(color = 0xFFFFB4AB))
-      }
-    }
-    Spacer(modifier = Modifier.height(height = 12.dp))
-    Row(
-      modifier = Modifier
-        .fillMaxWidth(fraction = 1.0f)
-        .border(width = 1.dp, color = Color.Transparent)
-        .padding(top = 12.dp),
-      horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-      Column {
-        Text(text = "AVG BUY", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = md_theme_dark_onSurfaceVariant)
-        Text(text = avgBuy, style = DataMedium.copy(fontSize = 12.sp), color = md_theme_dark_onSurface)
-      }
-      Column {
-        Text(text = "ROI", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = md_theme_dark_onSurfaceVariant)
-        Text(text = roi, style = DataMedium.copy(fontSize = 12.sp), color = if (isPositive) secondary_fixed_dim else Color(color = 0xFFFFB4AB))
-      }
-      Column(horizontalAlignment = Alignment.End) {
-        Text(text = "VALUE", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = md_theme_dark_onSurfaceVariant)
-        Text(text = value, style = DataMedium.copy(fontSize = 12.sp), color = md_theme_dark_onSurface)
-      }
+
+      Spacer(modifier = Modifier.height(12.dp))
+
+      // Progress Bar representing allocation percentage
+      LinearProgressIndicator(
+        progress = { allocationFraction },
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(6.dp)
+          .clip(CircleShape),
+        color = Color(0xFF1E60F9),
+        trackColor = Color(0xFFF0F3FA)
+      )
     }
   }
 }

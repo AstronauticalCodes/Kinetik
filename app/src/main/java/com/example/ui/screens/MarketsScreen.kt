@@ -16,28 +16,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CurrencyBitcoin
-import androidx.compose.material.icons.filled.FiberManualRecord
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,19 +43,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import com.example.data.TickerResponse
+import com.example.ui.components.AssetBadge
+import com.example.ui.components.FilterChips
+import com.example.ui.components.Sparkline
 import com.example.viewmodel.CryptoViewModel
-import com.example.ui.theme.DataLarge
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.md_theme_dark_primaryContainer
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.secondary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_highest
-import com.example.ui.theme.surface_container_low
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -72,177 +62,158 @@ public fun MarketsScreen(
 ): Unit {
   val state by viewModel.state.collectAsState()
   val candles by viewModel.candles.collectAsState()
+  var selectedCategory by remember { mutableStateOf("All") }
 
-  with(sharedTransitionScope) {
-    Scaffold(
-      modifier = modifier.fillMaxSize(fraction = 1.0f),
-      topBar = {
-        TopAppBar(
-          title = {
-            Text(
-              text = "MARKETS",
-              style = MaterialTheme.typography.headlineMedium,
-              color = md_theme_dark_primaryContainer,
-              letterSpacing = 2.sp
-            )
-          },
-          actions = {
-            IconButton(onClick = onNavigateToSearch) {
-              Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = "Search",
-                tint = md_theme_dark_onSurfaceVariant
-              )
-            }
-            Box(
-              modifier = Modifier
-                .padding(end = 16.dp)
-                .size(size = 32.dp)
-                .clip(shape = CircleShape)
-                .background(color = primary_fixed_dim),
-              contentAlignment = Alignment.Center
-            ) {
-              Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = "User",
-                tint = Color(color = 0xFF001F24),
-                modifier = Modifier.size(size = 18.dp)
-              )
-            }
-          },
-          colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent
+  Scaffold(
+    modifier = modifier.fillMaxSize(),
+    containerColor = Color(0xFFFAFAFA),
+    topBar = {
+      TopAppBar(
+        title = {
+          Text(
+            text = "Markets",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F172A)
           )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+          containerColor = Color.Transparent
         )
-      },
-      containerColor = Color.Transparent
-    ) { innerPadding ->
-      Column(
+      )
+    }
+  ) { innerPadding ->
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding)
+    ) {
+      // Search Bar Pill
+      Box(
         modifier = Modifier
-          .fillMaxSize(fraction = 1.0f)
-          .padding(paddingValues = innerPadding)
+          .fillMaxWidth()
+          .padding(horizontal = 20.dp, vertical = 4.dp)
+          .clip(CircleShape)
+          .background(Color(0xFFF1F5F9))
+          .clickable { onNavigateToSearch() }
+          .padding(horizontal = 16.dp, vertical = 12.dp),
+        contentAlignment = Alignment.CenterStart
       ) {
-        Box(
-          modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { onNavigateToSearch() }
-        ) {
-          OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            enabled = false,
-            modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-            placeholder = {
-              Text(text = "Search pairs, sectors, or addresses...", color = md_theme_dark_onSurfaceVariant.copy(alpha = 0.5f))
-            },
-            leadingIcon = {
-              Icon(imageVector = Icons.Filled.Search, contentDescription = "Search", tint = primary_fixed_dim)
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-              disabledBorderColor = primary_fixed_dim.copy(alpha = 0.3f),
-              disabledContainerColor = surface_container_highest,
-              disabledTextColor = md_theme_dark_onSurfaceVariant.copy(alpha = 0.5f),
-              disabledPlaceholderColor = md_theme_dark_onSurfaceVariant.copy(alpha = 0.5f),
-              disabledLeadingIconColor = primary_fixed_dim
-            ),
-            shape = RoundedCornerShape(size = 8.dp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = "Search",
+            tint = Color(0xFF94A3B8)
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text(
+            text = "Search coins, tokens...",
+            color = Color(0xFF94A3B8),
+            fontSize = 14.sp
           )
         }
-        
-        val selectedCategoryState = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(0) }
-        LazyRow(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(space = 8.dp)
-        ) {
-          val categories: List<String> = listOf("ALL ASSETS", "DEFI", "LAYER 1", "AI", "METAVERSE", "GAMING")
-          items(count = categories.size) { index ->
-            val category: String = categories[index]
-            val isSelected: Boolean = index == selectedCategoryState.value
-            Box(
-              modifier = Modifier
-                .background(
-                  color = if (isSelected) primary_fixed_dim.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f),
-                  shape = RoundedCornerShape(size = 12.dp)
-                )
-                .border(
-                  width = 1.dp,
-                  color = if (isSelected) primary_fixed_dim.copy(alpha = 0.5f) else Color.Transparent,
-                  shape = RoundedCornerShape(size = 12.dp)
-                )
-                .clickable { selectedCategoryState.value = index }
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-              contentAlignment = Alignment.Center
-            ) {
-              Text(
-                text = category,
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isSelected) primary_fixed_dim else Color.White.copy(alpha = 0.6f)
-              )
-            }
-          }
-        }
-        
-        
-        LazyRow(
-          modifier = Modifier
-            .fillMaxWidth(fraction = 1.0f)
-            .background(color = surface_container_low.copy(alpha = 0.5f))
-            .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f))
-            .padding(vertical = 12.dp),
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(space = 16.dp)
-        ) {
-          item { MarketNewsItem(sentiment = "BULLISH", text = "SEC approves new Spot ETFs") }
-          item { MarketNewsItem(sentiment = "NEUTRAL", text = "Network upgrade scheduled for epoch 402", color = md_theme_dark_onSurface) }
-          item { MarketNewsItem(sentiment = "BEARISH", text = "Regulatory concerns in EU region", color = Color(color = 0xFFFFB4AB)) }
-        }
+      }
 
-        Row(
-          modifier = Modifier
-            .fillMaxWidth(fraction = 1.0f)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-          Text(text = "ASSET / 24H TREND", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant.copy(alpha = 0.6f))
-          Text(text = "PRICE / CHG", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant.copy(alpha = 0.6f))
-        }
-        
-        LazyColumn(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          contentPadding = PaddingValues(bottom = 24.dp)
-        ) {
-          if (state.tickers.isEmpty()) {
-            item {
-              Text(
-                text = "Loading assets...",
-                color = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
-              )
-            }
-          } else {
-            items(count = state.tickers.size) { index ->
-              val ticker = state.tickers[index]
+      // Filter Chips Row
+      FilterChips(
+        categories = listOf("All", "DeFi", "Layer 1", "Layer 2", "NFT"),
+        selectedCategory = selectedCategory,
+        onCategorySelected = { selectedCategory = it }
+      )
+
+      // Market Summary Stats Card
+      MarketSummaryStatsCard(
+        mktCap = "$2.48T",
+        vol24h = "$94.2B",
+        btcDom = "53.4%"
+      )
+
+      // Asset List Card Container
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 20.dp, vertical = 12.dp)
+          .clip(RoundedCornerShape(20.dp))
+          .background(Color.White)
+          .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp))
+      ) {
+        Column {
+          // Table Header
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(
+              text = "Name",
+              fontSize = 12.sp,
+              fontWeight = FontWeight.SemiBold,
+              color = Color(0xFF64748B)
+            )
+            Text(
+              text = "Price / 24h",
+              fontSize = 12.sp,
+              fontWeight = FontWeight.SemiBold,
+              color = Color(0xFF64748B)
+            )
+          }
+
+          HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+
+          val displayList = if (state.tickers.isNotEmpty()) state.tickers else listOf(
+            TickerResponse("BTCUSDT", "1500.0", "2.45", "67420.00"),
+            TickerResponse("ETHUSDT", "65.0", "1.82", "3512.80"),
+            TickerResponse("SOLUSDT", "9.2", "5.31", "184.20"),
+            TickerResponse("BNBUSDT", "-5.3", "-0.91", "578.40")
+          )
+
+          LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(bottom = 16.dp)
+          ) {
+            items(displayList.size) { index ->
+              val ticker = displayList[index]
               val symbol = ticker.symbol.replace("USDT", "")
-              val price = ticker.lastPrice.toFloatOrNull()?.let { String.format(java.util.Locale.US, "%.2f", it) } ?: ticker.lastPrice
+              val name = when (symbol) {
+                "BTC" -> "Bitcoin"
+                "ETH" -> "Ethereum"
+                "SOL" -> "Solana"
+                "BNB" -> "BNB"
+                else -> symbol
+              }
+              val priceVal = ticker.lastPrice.toFloatOrNull() ?: 0f
+              val priceStr = String.format(Locale.US, "$%,.2f", priceVal)
               val changePct = ticker.priceChangePercent.toFloatOrNull() ?: 0f
               val isPositive = changePct >= 0
-              val changeStr = "${if(isPositive) "+" else ""}${String.format(java.util.Locale.US, "%.2f", changePct)}%"
+              val changeStr = "${if (isPositive) "+" else ""}${String.format(Locale.US, "%.2f", changePct)}%"
 
               val assetCandles = candles[ticker.symbol] ?: emptyList()
-              val sparklineData = assetCandles.map { it.close }
+              val sparklineData = if (assetCandles.isNotEmpty()) {
+                assetCandles.map { it.close }
+              } else {
+                if (isPositive) listOf(10f, 12f, 11f, 14f, 13f, 16f) else listOf(16f, 14f, 15f, 12f, 13f, 10f)
+              }
 
               MarketAssetRow(
                 symbol = symbol,
-                name = symbol, 
-                price = "$$price",
+                name = name,
+                price = priceStr,
                 change = changeStr,
                 isPositive = isPositive,
                 sparklineData = sparklineData,
                 animatedVisibilityScope = animatedVisibilityScope,
-                sharedTransitionScope = this@with,
+                sharedTransitionScope = sharedTransitionScope,
                 onClick = { onNavigateToAsset(symbol) }
               )
+
+              if (index < displayList.size - 1) {
+                HorizontalDivider(
+                  color = Color(0xFFF1F5F9),
+                  thickness = 1.dp,
+                  modifier = Modifier.padding(horizontal = 16.dp)
+                )
+              }
             }
           }
         }
@@ -252,105 +223,130 @@ public fun MarketsScreen(
 }
 
 @Composable
-public fun MarketNewsItem(sentiment: String, text: String, color: Color = secondary_fixed_dim): Unit {
-  Row(
+fun MarketSummaryStatsCard(
+  mktCap: String,
+  vol24h: String,
+  btcDom: String
+) {
+  Box(
     modifier = Modifier
-      .background(color = surface_container_highest, shape = RoundedCornerShape(size = 8.dp))
-      .padding(horizontal = 12.dp, vertical = 8.dp),
-    verticalAlignment = Alignment.CenterVertically
+      .fillMaxWidth()
+      .padding(horizontal = 20.dp, vertical = 8.dp)
+      .clip(RoundedCornerShape(16.dp))
+      .background(Color.White)
+      .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
+      .padding(16.dp)
   ) {
-    Icon(imageVector = Icons.Filled.FiberManualRecord, contentDescription = null, tint = color, modifier = Modifier.size(size = 8.dp))
-    Spacer(modifier = Modifier.width(width = 8.dp))
-    Text(text = sentiment, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = color)
-    Spacer(modifier = Modifier.width(width = 12.dp))
-    Text(text = text, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp), color = md_theme_dark_onSurface)
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      StatColumn(label = "Mkt Cap", value = mktCap, modifier = Modifier.weight(1f))
+      Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFFE2E8F0)))
+      StatColumn(label = "24h Vol", value = vol24h, modifier = Modifier.weight(1f))
+      Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFFE2E8F0)))
+      StatColumn(label = "BTC Dom", value = btcDom, modifier = Modifier.weight(1f))
+    }
+  }
+}
+
+@Composable
+private fun StatColumn(
+  label: String,
+  value: String,
+  modifier: Modifier = Modifier
+) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = modifier
+  ) {
+    Text(
+      text = label,
+      fontSize = 12.sp,
+      color = Color(0xFF64748B)
+    )
+    Spacer(modifier = Modifier.height(2.dp))
+    Text(
+      text = value,
+      fontSize = 15.sp,
+      fontWeight = FontWeight.Bold,
+      color = Color(0xFF0F172A)
+    )
   }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-public fun MarketAssetRow(
+fun MarketAssetRow(
   symbol: String,
   name: String,
   price: String,
   change: String,
   isPositive: Boolean,
-  sparklineData: List<Float> = emptyList(),
+  sparklineData: List<Float>,
   animatedVisibilityScope: AnimatedVisibilityScope,
   sharedTransitionScope: SharedTransitionScope,
   onClick: () -> Unit
-): Unit {
-  with(sharedTransitionScope) {
+) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable { onClick() }
+      .padding(vertical = 12.dp, horizontal = 16.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween
+  ) {
     Row(
-      modifier = Modifier
-        .fillMaxWidth(fraction = 1.0f)
-        .padding(horizontal = 16.dp, vertical = 4.dp)
-        .background(color = Color(color = 0xFF131315), shape = RoundedCornerShape(size = 16.dp))
-        .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f), shape = RoundedCornerShape(size = 16.dp))
-        .clickable { onClick() }
-        .padding(horizontal = 16.dp, vertical = 16.dp),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween
+      modifier = Modifier.weight(1.2f)
     ) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.weight(weight = 1.0f)
-      ) {
-        Box(
-          modifier = Modifier
-            .size(size = 40.dp)
-            .background(color = primary_fixed_dim.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 12.dp))
-            .border(width = 1.dp, color = primary_fixed_dim.copy(alpha = 0.2f), shape = RoundedCornerShape(size = 12.dp))
-            .sharedElement(
-              state = rememberSharedContentState(key = "icon-$symbol"),
-              animatedVisibilityScope = animatedVisibilityScope
-            ),
-          contentAlignment = Alignment.Center
-        ) {
-          Text(text = symbol.take(n = 1), color = primary_fixed_dim, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-        }
-        Spacer(modifier = Modifier.width(width = 16.dp))
-        Column {
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = symbol, style = DataLarge, color = Color.White)
-            if (symbol == "BTC") {
-               Spacer(modifier = Modifier.width(width = 8.dp))
-               Box(
-                 modifier = Modifier.background(color = secondary_fixed_dim.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 4.dp)).padding(horizontal = 4.dp, vertical = 2.dp)
-               ) {
-                 Text(text = "RANK 1", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = secondary_fixed_dim)
-               }
-            }
-          }
-          Text(text = name, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp), color = Color.White.copy(alpha = 0.4f))
-        }
-      }
-      
-      
-      Box(
-        modifier = Modifier
-          .weight(weight = 1.0f)
-          .height(height = 40.dp)
-          .padding(horizontal = 16.dp)
-      ) {
-        val finalData = if (sparklineData.isNotEmpty()) sparklineData else (if (isPositive) listOf(1f, 3f, 2f, 4f, 3.5f, 5f, 6f) else listOf(6f, 5f, 5.5f, 4f, 4.5f, 3f, 2f))
-        com.example.ui.components.Sparkline(
-          data = finalData,
-          color = if (isPositive) secondary_fixed_dim else Color(color = 0xFFFFB4AB),
-          strokeWidth = 3f
-        )
-      }
-
-      Column(
-        horizontalAlignment = Alignment.End
-      ) {
-        Text(text = price, style = DataMedium, color = Color.White)
+      AssetBadge(symbol = symbol)
+      Spacer(modifier = Modifier.width(12.dp))
+      Column {
         Text(
-          text = change,
-          style = DataMedium,
-          color = if (isPositive) secondary_fixed_dim else Color(color = 0xFFFFB4AB)
+          text = name,
+          fontSize = 15.sp,
+          fontWeight = FontWeight.Bold,
+          color = Color(0xFF0F172A)
+        )
+        Text(
+          text = "$symbol · $1.32T",
+          fontSize = 12.sp,
+          color = Color(0xFF64748B)
         )
       }
+    }
+
+    Box(
+      modifier = Modifier
+        .weight(0.8f)
+        .height(32.dp)
+        .padding(horizontal = 8.dp)
+    ) {
+      Sparkline(
+        data = sparklineData,
+        color = if (isPositive) Color(0xFF22C55E) else Color(0xFFEF4444),
+        strokeWidth = 3f
+      )
+    }
+
+    Column(
+      horizontalAlignment = Alignment.End,
+      modifier = Modifier.weight(1f)
+    ) {
+      Text(
+        text = price,
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color(0xFF0F172A)
+      )
+      Text(
+        text = change,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = if (isPositive) Color(0xFF22C55E) else Color(0xFFEF4444)
+      )
     }
   }
 }

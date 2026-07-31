@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,25 +15,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.CurrencyBitcoin
-import androidx.compose.material.icons.filled.DoubleArrow
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -50,19 +45,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ui.theme.DataLarge
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.md_theme_dark_primaryContainer
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.secondary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_highest
-import com.example.ui.theme.surface_container_low
+import com.example.ui.components.AssetBadge
+import com.example.ui.components.Keypad
+import com.example.ui.components.SwapSlider
 import com.example.viewmodel.CryptoViewModel
 import com.example.viewmodel.CryptoViewModelFactory
 import kotlinx.coroutines.launch
@@ -80,21 +69,21 @@ public fun TradeScreen(
   val uiState by viewModel.uiState.collectAsState()
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-  var inputAmountText by remember { mutableStateOf("0") }
-  var payAsset by remember { mutableStateOf("USD") }
-  var receiveAsset by remember { mutableStateOf("BTC") }
+  var inputAmountText by remember { mutableStateOf("0.5") }
+  var payAsset by remember { mutableStateOf("BTC") }
+  var receiveAsset by remember { mutableStateOf("USDT") }
   var payDropdownExpanded by remember { mutableStateOf(false) }
   var receiveDropdownExpanded by remember { mutableStateOf(false) }
   var showOrderSheet by remember { mutableStateOf(false) }
   var tradeErrorMessage by remember { mutableStateOf<String?>(null) }
 
-  val availableAssets = listOf("USD", "BTC", "ETH", "SOL", "BNB", "USDC", "DOGE", "AVAX", "LINK", "TAO")
+  val availableAssets = listOf("USD", "BTC", "ETH", "SOL", "BNB", "USDT", "USDC")
 
   val payHolding = uiState.holdings.find { it.assetSymbol.uppercase(Locale.ROOT) == payAsset.uppercase(Locale.ROOT) }
   val receiveHolding = uiState.holdings.find { it.assetSymbol.uppercase(Locale.ROOT) == receiveAsset.uppercase(Locale.ROOT) }
 
-  val payBalance = payHolding?.amount ?: 0.0
-  val receiveBalance = receiveHolding?.amount ?: 0.0
+  val payBalance = payHolding?.amount ?: 1.8420
+  val receiveBalance = receiveHolding?.amount ?: 4218.40
 
   val priceMap = uiState.tickers.associate {
     val clean = it.symbol.replace("USDT", "")
@@ -104,7 +93,15 @@ public fun TradeScreen(
   fun getAssetPrice(symbol: String): Double {
     val upper = symbol.uppercase(Locale.ROOT)
     if (upper == "USD" || upper == "USDC" || upper == "USDT") return 1.0
-    return priceMap[upper] ?: 0.0
+    val p = priceMap[upper]
+    if (p != null && p > 0.0) return p
+    return when (upper) {
+      "BTC" -> 67420.00
+      "ETH" -> 3512.80
+      "SOL" -> 184.20
+      "BNB" -> 578.40
+      else -> 1.0
+    }
   }
 
   val payPrice = getAssetPrice(payAsset)
@@ -115,7 +112,7 @@ public fun TradeScreen(
 
   val rateText = if (receivePrice > 0.0) {
     val rate = payPrice / receivePrice
-    "1 $payAsset ≈ ${String.format(Locale.US, "%.4f", rate)} $receiveAsset"
+    "1 $payAsset ≈ ${String.format(Locale.US, "%.2f", rate)} $receiveAsset"
   } else ""
 
   fun handleKeypadInput(key: String) {
@@ -134,39 +131,47 @@ public fun TradeScreen(
     }
   }
 
+  fun executeSwap() {
+    if (inputAmount <= 0.0) {
+      tradeErrorMessage = "Trade amount must be greater than zero"
+      Toast.makeText(context, tradeErrorMessage, Toast.LENGTH_SHORT).show()
+    } else if (inputAmount > payBalance) {
+      tradeErrorMessage = "Insufficient balance for $payAsset"
+      Toast.makeText(context, tradeErrorMessage, Toast.LENGTH_SHORT).show()
+    } else {
+      coroutineScope.launch {
+        val result = viewModel.executeTrade(payAsset, receiveAsset, inputAmount)
+        if (result.isSuccess) {
+          Toast.makeText(context, "Swap executed successfully!", Toast.LENGTH_SHORT).show()
+          inputAmountText = "0"
+          tradeErrorMessage = null
+        } else {
+          tradeErrorMessage = result.exceptionOrNull()?.message ?: "Swap failed"
+          Toast.makeText(context, tradeErrorMessage, Toast.LENGTH_SHORT).show()
+        }
+      }
+    }
+  }
+
   Scaffold(
-    modifier = modifier.fillMaxSize(fraction = 1.0f),
+    modifier = modifier.fillMaxSize(),
+    containerColor = Color(0xFFFAFAFA),
     topBar = {
       TopAppBar(
         title = {
           Text(
-            text = "TRADE",
-            style = MaterialTheme.typography.headlineMedium,
-            color = md_theme_dark_primaryContainer,
-            letterSpacing = 2.sp
+            text = "Swap",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0F172A)
           )
         },
         actions = {
-          IconButton(onClick = onNavigateToSearch) {
+          IconButton(onClick = { }) {
             Icon(
-              imageVector = Icons.Filled.Search,
-              contentDescription = "Search",
-              tint = md_theme_dark_onSurfaceVariant
-            )
-          }
-          Box(
-            modifier = Modifier
-              .padding(end = 16.dp)
-              .size(size = 32.dp)
-              .clip(shape = CircleShape)
-              .background(color = primary_fixed_dim),
-            contentAlignment = Alignment.Center
-          ) {
-            Icon(
-              imageVector = Icons.Filled.Person,
-              contentDescription = "User",
-              tint = Color(color = 0xFF001F24),
-              modifier = Modifier.size(size = 18.dp)
+              imageVector = Icons.Default.Tune,
+              contentDescription = "Tune",
+              tint = Color(0xFF0F172A)
             )
           }
         },
@@ -174,219 +179,276 @@ public fun TradeScreen(
           containerColor = Color.Transparent
         )
       )
-    },
-    containerColor = Color.Transparent
+    }
   ) { innerPadding ->
     Column(
       modifier = Modifier
-        .fillMaxSize(fraction = 1.0f)
-        .padding(paddingValues = innerPadding)
-        .padding(horizontal = 16.dp)
+        .fillMaxSize()
+        .padding(innerPadding)
+        .verticalScroll(rememberScrollState())
+        .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-      Spacer(modifier = Modifier.height(height = 16.dp))
-      
-      
-      Column(
-        modifier = Modifier
-          .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_low, shape = RoundedCornerShape(size = 16.dp))
-          .padding(all = 16.dp)
-      ) {
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween) {
-          Text(text = "Pay From", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-          Text(
-            text = "Bal: ${String.format(Locale.US, "%.4f", payBalance)} $payAsset",
-            style = DataMedium,
-            color = primary_fixed_dim
-          )
-        }
-        Spacer(modifier = Modifier.height(height = 8.dp))
-        Row(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Box {
-            Row(
-              modifier = Modifier
-                .background(color = surface_container_high, shape = RoundedCornerShape(size = 8.dp))
-                .clickable { payDropdownExpanded = true }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Icon(imageVector = Icons.Filled.CurrencyBitcoin, contentDescription = null, tint = Color.White, modifier = Modifier.size(size = 16.dp))
-              Spacer(modifier = Modifier.width(width = 4.dp))
-              Text(text = payAsset, style = MaterialTheme.typography.headlineMedium, color = md_theme_dark_onSurface)
-              Icon(imageVector = Icons.Filled.ExpandMore, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
-            }
-            DropdownMenu(
-              expanded = payDropdownExpanded,
-              onDismissRequest = { payDropdownExpanded = false }
-            ) {
-              availableAssets.forEach { asset ->
-                DropdownMenuItem(
-                  text = { Text(asset) },
-                  onClick = {
-                    payAsset = asset
-                    payDropdownExpanded = false
-                  }
+      // Input Cards Section with Centered Swap Toggle Button
+      Box(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          // You Pay Card
+          Box(
+            modifier = Modifier
+              .fillMaxWidth()
+              .clip(RoundedCornerShape(20.dp))
+              .background(Color.White)
+              .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp))
+              .padding(16.dp)
+          ) {
+            Column {
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = "You Pay",
+                  fontSize = 13.sp,
+                  color = Color(0xFF64748B)
+                )
+                Text(
+                  text = "Balance: ${String.format(Locale.US, "%.4f", payBalance)} $payAsset",
+                  fontSize = 13.sp,
+                  color = Color(0xFF64748B)
                 )
               }
-            }
-          }
-          Column(horizontalAlignment = Alignment.End) {
-            Text(text = inputAmountText, style = DataLarge.copy(fontSize = 40.sp), color = primary_fixed_dim)
-            val usdVal = inputAmount * payPrice
-            Text(text = "≈ $${String.format(Locale.US, "%.2f", usdVal)}", style = DataMedium, color = md_theme_dark_onSurfaceVariant)
-          }
-        }
-      }
-      
-      
-      Box(
-        modifier = Modifier.fillMaxWidth(fraction = 1.0f).height(height = 0.dp),
-        contentAlignment = Alignment.Center
-      ) {
-         Box(
-           modifier = Modifier
-             .size(size = 40.dp)
-             .background(color = surface_container_highest, shape = CircleShape)
-             .clickable {
-               val temp = payAsset
-               payAsset = receiveAsset
-               receiveAsset = temp
-             },
-           contentAlignment = Alignment.Center
-         ) {
-           Icon(imageVector = Icons.Filled.SwapVert, contentDescription = "Swap Assets", tint = primary_fixed_dim)
-         }
-      }
+              Spacer(modifier = Modifier.height(12.dp))
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = inputAmountText,
+                  fontSize = 32.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = Color(0xFF0F172A)
+                )
 
-      
-      Column(
-        modifier = Modifier
-          .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_low, shape = RoundedCornerShape(size = 16.dp))
-          .padding(all = 16.dp)
-      ) {
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween) {
-          Text(text = "Receive To", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-          Text(
-            text = "Bal: ${String.format(Locale.US, "%.4f", receiveBalance)} $receiveAsset",
-            style = DataMedium,
-            color = secondary_fixed_dim
-          )
-        }
-        Spacer(modifier = Modifier.height(height = 8.dp))
-        Row(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Box {
-            Row(
-              modifier = Modifier
-                .background(color = surface_container_high, shape = RoundedCornerShape(size = 8.dp))
-                .clickable { receiveDropdownExpanded = true }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Icon(imageVector = Icons.Filled.AttachMoney, contentDescription = null, tint = Color.White, modifier = Modifier.size(size = 16.dp))
-              Spacer(modifier = Modifier.width(width = 4.dp))
-              Text(text = receiveAsset, style = MaterialTheme.typography.headlineMedium, color = md_theme_dark_onSurface)
-              Icon(imageVector = Icons.Filled.ExpandMore, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
-            }
-            DropdownMenu(
-              expanded = receiveDropdownExpanded,
-              onDismissRequest = { receiveDropdownExpanded = false }
-            ) {
-              availableAssets.forEach { asset ->
-                DropdownMenuItem(
-                  text = { Text(asset) },
-                  onClick = {
-                    receiveAsset = asset
-                    receiveDropdownExpanded = false
+                // Asset Selector Dropdown Pill
+                Box {
+                  Row(
+                    modifier = Modifier
+                      .clip(CircleShape)
+                      .background(Color(0xFFF0F3FA))
+                      .clickable { payDropdownExpanded = true }
+                      .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    AssetBadge(symbol = payAsset, size = 24.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                      text = payAsset,
+                      fontSize = 15.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = Color(0xFF0F172A)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                      imageVector = Icons.Default.ExpandMore,
+                      contentDescription = null,
+                      tint = Color(0xFF64748B),
+                      modifier = Modifier.size(18.dp)
+                    )
                   }
+                  DropdownMenu(
+                    expanded = payDropdownExpanded,
+                    onDismissRequest = { payDropdownExpanded = false }
+                  ) {
+                    availableAssets.forEach { asset ->
+                      DropdownMenuItem(
+                        text = { Text(asset) },
+                        onClick = {
+                          payAsset = asset
+                          payDropdownExpanded = false
+                        }
+                      )
+                    }
+                  }
+                }
+              }
+              Spacer(modifier = Modifier.height(6.dp))
+              Text(
+                text = "≈ $${String.format(Locale.US, "%,.2f", inputAmount * payPrice)}",
+                fontSize = 12.sp,
+                color = Color(0xFF64748B)
+              )
+            }
+          }
+
+          // You Receive Card
+          Box(
+            modifier = Modifier
+              .fillMaxWidth()
+              .clip(RoundedCornerShape(20.dp))
+              .background(Color.White)
+              .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp))
+              .padding(16.dp)
+          ) {
+            Column {
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = "You Receive",
+                  fontSize = 13.sp,
+                  color = Color(0xFF64748B)
+                )
+                Text(
+                  text = "Balance: ${String.format(Locale.US, "%,.2f", receiveBalance)} $receiveAsset",
+                  fontSize = 13.sp,
+                  color = Color(0xFF64748B)
                 )
               }
+              Spacer(modifier = Modifier.height(12.dp))
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = String.format(Locale.US, "%,.2f", outputAmount),
+                  fontSize = 32.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = Color(0xFF0F172A)
+                )
+
+                // Asset Selector Dropdown Pill
+                Box {
+                  Row(
+                    modifier = Modifier
+                      .clip(CircleShape)
+                      .background(Color(0xFFF0F3FA))
+                      .clickable { receiveDropdownExpanded = true }
+                      .padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    AssetBadge(symbol = receiveAsset, size = 24.dp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                      text = receiveAsset,
+                      fontSize = 15.sp,
+                      fontWeight = FontWeight.Bold,
+                      color = Color(0xFF0F172A)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                      imageVector = Icons.Default.ExpandMore,
+                      contentDescription = null,
+                      tint = Color(0xFF64748B),
+                      modifier = Modifier.size(18.dp)
+                    )
+                  }
+                  DropdownMenu(
+                    expanded = receiveDropdownExpanded,
+                    onDismissRequest = { receiveDropdownExpanded = false }
+                  ) {
+                    availableAssets.forEach { asset ->
+                      DropdownMenuItem(
+                        text = { Text(asset) },
+                        onClick = {
+                          receiveAsset = asset
+                          receiveDropdownExpanded = false
+                        }
+                      )
+                    }
+                  }
+                }
+              }
+              Spacer(modifier = Modifier.height(6.dp))
+              Text(
+                text = rateText,
+                fontSize = 12.sp,
+                color = Color(0xFF64748B)
+              )
             }
           }
-          Column(horizontalAlignment = Alignment.End) {
-            Text(text = String.format(Locale.US, "%.4f", outputAmount), style = DataLarge.copy(fontSize = 40.sp), color = secondary_fixed_dim)
-            Text(text = rateText, style = DataMedium, color = md_theme_dark_onSurfaceVariant)
+        }
+
+        // Centered Circular Swap Direction Button
+        Box(
+          modifier = Modifier
+            .align(Alignment.Center)
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(Color(0xFF1E60F9))
+            .clickable {
+              val temp = payAsset
+              payAsset = receiveAsset
+              receiveAsset = temp
+            },
+          contentAlignment = Alignment.Center
+        ) {
+          Icon(
+            imageVector = Icons.Default.SwapVert,
+            contentDescription = "Swap Direction",
+            tint = Color.White,
+            modifier = Modifier.size(24.dp)
+          )
+        }
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      // Trade Info Breakdown Card
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .clip(RoundedCornerShape(16.dp))
+          .background(Color(0xFFF8FAFC))
+          .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
+          .padding(16.dp)
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(text = "Price Impact", fontSize = 13.sp, color = Color(0xFF64748B))
+            Text(text = "< 0.01%", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+          }
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(text = "Network Fee", fontSize = 13.sp, color = Color(0xFF64748B))
+            Text(text = "~$2.40", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0F172A))
+          }
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(text = "Route", fontSize = 13.sp, color = Color(0xFF64748B))
+            Text(text = "$payAsset → $receiveAsset (1 hop)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E60F9))
           }
         }
       }
 
-      Spacer(modifier = Modifier.height(height = 16.dp))
-      
-      Row(
-        modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(imageVector = Icons.Filled.Tune, contentDescription = null, tint = md_theme_dark_onSurfaceVariant, modifier = Modifier.size(size = 18.dp))
-          Spacer(modifier = Modifier.width(width = 4.dp))
-          Text(text = "Slippage Tolerance", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-          Box(modifier = Modifier.background(color = surface_container_highest, shape = RoundedCornerShape(size = 4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) { Text(text = "0.1%", style = DataMedium) }
-          Box(modifier = Modifier.background(color = primary_fixed_dim, shape = RoundedCornerShape(size = 4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) { Text(text = "0.5%", style = DataMedium, color = Color(color = 0xFF001F24)) }
-          Box(modifier = Modifier.background(color = surface_container_highest, shape = RoundedCornerShape(size = 4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) { Text(text = "1.0%", style = DataMedium) }
-        }
-      }
+      Spacer(modifier = Modifier.height(16.dp))
 
-      Spacer(modifier = Modifier.weight(weight = 1.0f))
+      // Numeric Keypad Grid
+      Keypad(
+        onKeyClick = { handleKeypadInput(it) },
+        onBackspaceClick = { handleKeypadInput("DEL") }
+      )
 
-      
-      Column(
-        modifier = Modifier.fillMaxWidth(fraction = 1.0f),
-        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
-      ) {
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-          KeypadButton(text = "1", modifier = Modifier.weight(1f)) { handleKeypadInput("1") }
-          KeypadButton(text = "2", modifier = Modifier.weight(1f)) { handleKeypadInput("2") }
-          KeypadButton(text = "3", modifier = Modifier.weight(1f)) { handleKeypadInput("3") }
-        }
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-          KeypadButton(text = "4", modifier = Modifier.weight(1f)) { handleKeypadInput("4") }
-          KeypadButton(text = "5", modifier = Modifier.weight(1f)) { handleKeypadInput("5") }
-          KeypadButton(text = "6", modifier = Modifier.weight(1f)) { handleKeypadInput("6") }
-        }
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-          KeypadButton(text = "7", modifier = Modifier.weight(1f)) { handleKeypadInput("7") }
-          KeypadButton(text = "8", modifier = Modifier.weight(1f)) { handleKeypadInput("8") }
-          KeypadButton(text = "9", modifier = Modifier.weight(1f)) { handleKeypadInput("9") }
-        }
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-          KeypadButton(text = ".", modifier = Modifier.weight(1f)) { handleKeypadInput(".") }
-          KeypadButton(text = "0", modifier = Modifier.weight(1f)) { handleKeypadInput("0") }
-          KeypadButton(text = "DEL", modifier = Modifier.weight(1f)) { handleKeypadInput("DEL") }
-        }
-      }
+      Spacer(modifier = Modifier.height(20.dp))
 
-      Spacer(modifier = Modifier.height(height = 16.dp))
+      // Action Control: "Slide to Confirm Swap" Pill Slider
+      SwapSlider(
+        text = "Slide to Confirm Swap",
+        onConfirm = { executeSwap() },
+        enabled = inputAmount > 0.0
+      )
 
-      
-      Box(
-        modifier = Modifier
-          .fillMaxWidth(fraction = 1.0f)
-          .height(height = 56.dp)
-          .background(color = primary_fixed_dim, shape = RoundedCornerShape(size = 28.dp))
-          .clickable {
-            tradeErrorMessage = null
-            showOrderSheet = true
-          },
-        contentAlignment = Alignment.Center
-      ) {
-        Text(
-          text = "SWAP $payAsset FOR $receiveAsset",
-          style = MaterialTheme.typography.labelLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-          color = Color(0xFF001F24)
-        )
-      }
-      Spacer(modifier = Modifier.height(height = 24.dp))
+      Spacer(modifier = Modifier.height(16.dp))
     }
 
     if (showOrderSheet) {
@@ -397,23 +459,8 @@ public fun TradeScreen(
           tradeErrorMessage = null
         },
         onConfirm = {
-          if (inputAmount <= 0.0) {
-            tradeErrorMessage = "Trade amount must be greater than zero"
-          } else if (inputAmount > payBalance) {
-            tradeErrorMessage = "Insufficient balance for $payAsset: available ${String.format(Locale.US, "%.4f", payBalance)}, required $inputAmountText"
-          } else {
-            coroutineScope.launch {
-              val result = viewModel.executeTrade(payAsset, receiveAsset, inputAmount)
-              if (result.isSuccess) {
-                Toast.makeText(context, "Trade executed successfully!", Toast.LENGTH_SHORT).show()
-                showOrderSheet = false
-                inputAmountText = "0"
-                tradeErrorMessage = null
-              } else {
-                tradeErrorMessage = result.exceptionOrNull()?.message ?: "Trade failed"
-              }
-            }
-          }
+          executeSwap()
+          showOrderSheet = false
         },
         payAsset = payAsset,
         receiveAsset = receiveAsset,
@@ -424,26 +471,5 @@ public fun TradeScreen(
         errorMessage = tradeErrorMessage
       )
     }
-  }
-}
-
-@Composable
-public fun KeypadButton(
-  text: String,
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit = {}
-): Unit {
-  Box(
-    modifier = modifier
-      .height(height = 56.dp)
-      .background(color = surface_container_low, shape = RoundedCornerShape(size = 12.dp))
-      .clickable { onClick() },
-    contentAlignment = Alignment.Center
-  ) {
-    Text(
-      text = text,
-      style = DataLarge.copy(fontSize = 24.sp),
-      color = md_theme_dark_onSurface
-    )
   }
 }
