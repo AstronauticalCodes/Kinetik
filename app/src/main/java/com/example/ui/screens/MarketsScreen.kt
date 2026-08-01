@@ -88,7 +88,6 @@ public fun MarketsScreen(
         .fillMaxSize()
         .padding(innerPadding)
     ) {
-      // Search Bar Pill
       Box(
         modifier = Modifier
           .fillMaxWidth()
@@ -114,21 +113,18 @@ public fun MarketsScreen(
         }
       }
 
-      // Filter Chips Row
       FilterChips(
         categories = listOf("All", "DeFi", "Layer 1", "Layer 2", "NFT"),
         selectedCategory = selectedCategory,
         onCategorySelected = { selectedCategory = it }
       )
 
-      // Market Summary Stats Card
       MarketSummaryStatsCard(
         mktCap = "$2.48T",
         vol24h = "$94.2B",
         btcDom = "53.4%"
       )
 
-      // Asset List Card Container
       Box(
         modifier = Modifier
           .fillMaxWidth()
@@ -138,7 +134,6 @@ public fun MarketsScreen(
           .border(1.dp, Color(0xFFF1F5F9), RoundedCornerShape(20.dp))
       ) {
         Column {
-          // Table Header
           Row(
             modifier = Modifier
               .fillMaxWidth()
