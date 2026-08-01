@@ -188,10 +188,8 @@ public fun TradeScreen(
         .verticalScroll(rememberScrollState())
         .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-      // Input Cards Section with Centered Swap Toggle Button
       Box(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          // You Pay Card
           Box(
             modifier = Modifier
               .fillMaxWidth()
@@ -230,7 +228,6 @@ public fun TradeScreen(
                   color = Color(0xFF0F172A)
                 )
 
-                // Asset Selector Dropdown Pill
                 Box {
                   Row(
                     modifier = Modifier
@@ -281,7 +278,6 @@ public fun TradeScreen(
             }
           }
 
-          // You Receive Card
           Box(
             modifier = Modifier
               .fillMaxWidth()
@@ -320,7 +316,6 @@ public fun TradeScreen(
                   color = Color(0xFF0F172A)
                 )
 
-                // Asset Selector Dropdown Pill
                 Box {
                   Row(
                     modifier = Modifier
@@ -372,7 +367,6 @@ public fun TradeScreen(
           }
         }
 
-        // Centered Circular Swap Direction Button
         Box(
           modifier = Modifier
             .align(Alignment.Center)
@@ -397,7 +391,6 @@ public fun TradeScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
-      // Trade Info Breakdown Card
       Box(
         modifier = Modifier
           .fillMaxWidth()
@@ -433,7 +426,6 @@ public fun TradeScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
-      // Numeric Keypad Grid
       Keypad(
         onKeyClick = { handleKeypadInput(it) },
         onBackspaceClick = { handleKeypadInput("DEL") }
@@ -441,7 +433,6 @@ public fun TradeScreen(
 
       Spacer(modifier = Modifier.height(20.dp))
 
-      // Action Control: "Slide to Confirm Swap" Pill Slider
       SwapSlider(
         text = "Slide to Confirm Swap",
         onConfirm = { executeSwap() },

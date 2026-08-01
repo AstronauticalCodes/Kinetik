@@ -29,7 +29,6 @@ public fun CandlestickChart(
     Canvas(modifier = modifier.fillMaxSize(fraction = 1.0f)) {
         if (data.isEmpty()) return@Canvas
 
-        // Draw horizontal grid lines
         val gridLines = 4
         val dashEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
         for (i in 0..gridLines) {
@@ -60,7 +59,6 @@ public fun CandlestickChart(
             val openY = size.height - ((candle.open - minPrice) / range * size.height)
             val closeY = size.height - ((candle.close - minPrice) / range * size.height)
 
-            // Draw wick
             drawLine(
                 color = color,
                 start = Offset(x, highY),
@@ -69,7 +67,6 @@ public fun CandlestickChart(
                 cap = StrokeCap.Round
             )
 
-            // Draw candle body
             val topY = min(openY, closeY)
             val bottomY = max(openY, closeY)
             val bodyHeight = max(bottomY - topY, 3f)

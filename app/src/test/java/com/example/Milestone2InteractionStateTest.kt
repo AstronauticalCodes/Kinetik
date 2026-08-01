@@ -12,7 +12,6 @@ import java.util.Locale
 
 class Milestone2InteractionStateTest {
 
-    // Helper simulating TradeScreen's keypad state machine
     class KeypadInputSimulator(initialText: String = "0.5") {
         var inputAmountText: String = initialText
             private set
@@ -34,7 +33,6 @@ class Milestone2InteractionStateTest {
         }
     }
 
-    // Helper simulating SwapSlider logic
     class SwapSliderSimulator(
         val containerWidthPx: Float = 400f,
         val handleSizePx: Float = 100f,
@@ -66,16 +64,11 @@ class Milestone2InteractionStateTest {
         }
     }
 
-    // ==========================================
-    // 1. SwapSlider Empirical Tests
-    // ==========================================
-
     @Test
     fun testSwapSlider_ThresholdLogic_At75Percent_TriggersConfirm() {
         val slider = SwapSliderSimulator(containerWidthPx = 400f, handleSizePx = 100f, paddingPx = 10f)
-        assertEquals(280f, slider.maxDragPx, 0.001f) // 400 - 100 - 20 = 280
+        assertEquals(280f, slider.maxDragPx, 0.001f)
 
-        // Drag to exactly 75% of maxDragPx (280 * 0.75 = 210)
         slider.onDrag(210f)
         assertEquals(210f, slider.dragOffsetPx, 0.001f)
         assertTrue(slider.isDragging)
@@ -90,7 +83,6 @@ class Milestone2InteractionStateTest {
     fun testSwapSlider_ThresholdLogic_Below75Percent_DoesNotTriggerConfirm() {
         val slider = SwapSliderSimulator(containerWidthPx = 400f, handleSizePx = 100f, paddingPx = 10f)
         
-        // Drag to 74% of maxDragPx (280 * 0.74 = 207.2)
         slider.onDrag(207.2f)
         assertEquals(207.2f, slider.dragOffsetPx, 0.001f)
 
@@ -104,11 +96,9 @@ class Milestone2InteractionStateTest {
     fun testSwapSlider_DragBounds_CoercedWithinZeroAndMax() {
         val slider = SwapSliderSimulator(containerWidthPx = 400f, handleSizePx = 100f, paddingPx = 10f)
 
-        // Drag past right bound
         slider.onDrag(500f)
         assertEquals(280f, slider.dragOffsetPx, 0.001f)
 
-        // Drag past left bound (negative)
         slider.onDrag(-400f)
         assertEquals(0f, slider.dragOffsetPx, 0.001f)
     }
@@ -124,10 +114,6 @@ class Milestone2InteractionStateTest {
         slider.onDragStopped()
         assertFalse(slider.confirmed)
     }
-
-    // ==========================================
-    // 2. Keypad Input Filtering Empirical Tests
-    // ==========================================
 
     @Test
     fun testKeypad_MultipleDecimals_Rejected() {
@@ -146,24 +132,19 @@ class Milestone2InteractionStateTest {
     fun testKeypad_ZeroLeadingDigits_HandledCorrectly() {
         val keypad = KeypadInputSimulator("0")
 
-        // Typing 5 on initial "0" replaces "0" with "5"
         keypad.handleKeypadInput("5")
         assertEquals("5", keypad.inputAmountText)
 
-        // Reset to "0"
         val keypadZero = KeypadInputSimulator("0")
         keypadZero.handleKeypadInput("0")
         assertEquals("0", keypadZero.inputAmountText)
 
-        // Typing decimal on "0" yields "0."
         keypadZero.handleKeypadInput(".")
         assertEquals("0.", keypadZero.inputAmountText)
 
-        // Typing 0 on "0." yields "0.0"
         keypadZero.handleKeypadInput("0")
         assertEquals("0.0", keypadZero.inputAmountText)
 
-        // Typing 5 on "0.0" yields "0.05"
         keypadZero.handleKeypadInput("5")
         assertEquals("0.05", keypadZero.inputAmountText)
     }
@@ -192,16 +173,11 @@ class Milestone2InteractionStateTest {
         assertEquals("0", keypad.inputAmountText)
     }
 
-    // ==========================================
-    // 3. Core Screens Data Flow & Interaction Tests
-    // ==========================================
-
     @Test
     fun testTradeScreen_AssetSwapDirectionToggle() {
         var payAsset = "BTC"
         var receiveAsset = "USDT"
 
-        // Perform swap direction toggle
         val temp = payAsset
         payAsset = receiveAsset
         receiveAsset = temp
@@ -214,7 +190,7 @@ class Milestone2InteractionStateTest {
     fun testTradeScreen_OutputAmountCalculation() {
         val inputAmount = 0.5
         val payPrice = 67420.00
-        val receivePrice = 1.0 // USDT
+        val receivePrice = 1.0
 
         val outputAmount = if (receivePrice > 0.0) (inputAmount * payPrice) / receivePrice else 0.0
         assertEquals(33710.00, outputAmount, 0.01)

@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 
 data class DonutSegment(
     val symbol: String,
-    val percentage: Float, // e.g. 45f for 45%
-    val valueUsd: String,  // e.g. "$64,276"
+    val percentage: Float,
+    val valueUsd: String,
     val color: Color
 )
 
@@ -46,7 +46,6 @@ fun DonutChart(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Donut Canvas with Center Text
         Box(
             modifier = Modifier.size(chartSize),
             contentAlignment = Alignment.Center
@@ -83,7 +82,6 @@ fun DonutChart(
             }
         }
 
-        // Legend List
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier

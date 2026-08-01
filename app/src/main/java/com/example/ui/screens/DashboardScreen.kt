@@ -136,7 +136,6 @@ fun DashboardTopHeader(userName: String) {
       horizontalArrangement = Arrangement.spacedBy(10.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      // Bell notification icon pill
       Box(
         modifier = Modifier
           .size(40.dp)
@@ -151,7 +150,6 @@ fun DashboardTopHeader(userName: String) {
           modifier = Modifier.size(20.dp)
         )
       }
-      // User Profile Initials Avatar
       Box(
         modifier = Modifier
           .size(40.dp)
@@ -240,7 +238,6 @@ fun PortfolioGradientCard(
 
       Spacer(modifier = Modifier.height(24.dp))
 
-      // Action Pills Row
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)

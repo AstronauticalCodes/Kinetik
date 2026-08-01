@@ -83,7 +83,6 @@ public fun PortfolioScreen(
               fontWeight = FontWeight.Bold,
               color = Color(0xFF0F172A)
             )
-            // Timeframe Selector Pills
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
               listOf("1W", "1M", "3M", "ALL").forEach { tf ->
                 val isSelected = tf == selectedTimeframe
@@ -127,7 +126,6 @@ public fun PortfolioScreen(
         .padding(innerPadding),
       contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 32.dp)
     ) {
-      // Asset Allocation Card
       item {
         Box(
           modifier = Modifier
@@ -165,7 +163,6 @@ public fun PortfolioScreen(
         }
       }
 
-      // 2x2 Stats Grid
       item {
         Spacer(modifier = Modifier.height(12.dp))
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -208,7 +205,6 @@ public fun PortfolioScreen(
         }
       }
 
-      // Holdings Section
       item {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
@@ -367,7 +363,6 @@ fun HoldingCard(
 
       Spacer(modifier = Modifier.height(12.dp))
 
-      // Progress Bar representing allocation percentage
       LinearProgressIndicator(
         progress = { allocationFraction },
         modifier = Modifier

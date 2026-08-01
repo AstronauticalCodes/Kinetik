@@ -2,7 +2,6 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light Theme Tokens
 public val LightBackground: Color = Color(0xFFFAFAFA)
 public val LightSurface: Color = Color(0xFFFFFFFF)
 public val LightSurfaceVariant: Color = Color(0xFFF1F5F9)
@@ -10,7 +9,6 @@ public val LightOutline: Color = Color(0xFFE2E8F0)
 public val LightTextPrimary: Color = Color(0xFF0F172A)
 public val LightTextSecondary: Color = Color(0xFF64748B)
 
-// Dark Theme Tokens
 public val DarkBackground: Color = Color(0xFF0F172A)
 public val DarkSurface: Color = Color(0xFF1E293B)
 public val DarkSurfaceVariant: Color = Color(0xFF334155)
@@ -18,7 +16,6 @@ public val DarkOutline: Color = Color(0xFF475569)
 public val DarkTextPrimary: Color = Color(0xFFF8FAFC)
 public val DarkTextSecondary: Color = Color(0xFF94A3B8)
 
-// Kinetik Brand Tokens
 public val KinetikBluePrimary: Color = Color(0xFF1E60F9)
 public val KinetikGreenGain: Color = Color(0xFF22C55E)
 public val KinetikRedLoss: Color = Color(0xFFEF4444)

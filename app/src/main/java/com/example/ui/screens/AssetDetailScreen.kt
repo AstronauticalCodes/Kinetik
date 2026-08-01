@@ -179,7 +179,6 @@ public fun AssetDetailScreen(
         .padding(innerPadding),
       contentPadding = PaddingValues(bottom = 24.dp)
     ) {
-      // Price Header Display
       item {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
           Text(
@@ -220,7 +219,6 @@ public fun AssetDetailScreen(
         }
       }
 
-      // Candlestick Chart
       item {
         Box(
           modifier = Modifier
@@ -237,7 +235,6 @@ public fun AssetDetailScreen(
         }
       }
 
-      // Timeframe Selector Pills
       item {
         Row(
           modifier = Modifier
@@ -267,7 +264,6 @@ public fun AssetDetailScreen(
         }
       }
 
-      // 24H Stats Card
       item {
         Box(
           modifier = Modifier
@@ -304,7 +300,6 @@ public fun AssetDetailScreen(
         }
       }
 
-      // Order Book View
       item {
         Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
           OrderBookView(symbol = symbol)

@@ -65,7 +65,6 @@ fun SwapSlider(
             .onGloballyPositioned { containerWidthPx = it.size.width.toFloat() },
         contentAlignment = Alignment.CenterStart
     ) {
-        // Centered Label Text
         Text(
             text = text,
             color = Color.White.copy(
@@ -76,7 +75,6 @@ fun SwapSlider(
             modifier = Modifier.align(Alignment.Center)
         )
 
-        // Draggable Circular Thumb
         Box(
             modifier = Modifier
                 .padding(start = 4.dp)

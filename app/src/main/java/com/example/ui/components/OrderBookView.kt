@@ -54,7 +54,6 @@ fun OrderBookView(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        // Asks (Red)
         asks.forEach { ask ->
             OrderBookRow(
                 price = ask.price,
@@ -66,7 +65,6 @@ fun OrderBookView(
             Spacer(modifier = Modifier.height(4.dp))
         }
 
-        // Spread Divider
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,7 +81,6 @@ fun OrderBookView(
             )
         }
 
-        // Bids (Green)
         bids.forEach { bid ->
             OrderBookRow(
                 price = bid.price,
@@ -110,7 +107,6 @@ private fun OrderBookRow(
             .fillMaxWidth()
             .height(28.dp)
     ) {
-        // Depth background fill
         Box(
             modifier = Modifier
                 .fillMaxHeight()
