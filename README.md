@@ -11,8 +11,6 @@
 
 **Kinetik** is a sleek, dark-themed crypto wallet & trading interface built with Jetpack Compose and powered by live Binance market data. Track your portfolio in real time, execute trades with balance validation, and explore the market — all from a beautifully crafted mobile experience.
 
-</div>
-
 ---
 
 ## Screenshots
@@ -22,11 +20,11 @@
 <!-- Replace these with actual screenshot paths -->
 | Dashboard | Markets | Asset Detail |
 |:-:|:-:|:-:|
-| <img src="https://github.com/user-attachments/assets/bfd5a64d-76d6-4c89-88c5-86fb2ab9f1fb" width="250"/> | <img src="https://github.com/user-attachments/assets/6970979f-0f9a-4e2e-a559-74d0ecbbd77e" width="250"/> | <img src="https://github.com/user-attachments/assets/61c089b2-d7c1-44a7-84fc-94fa599d5dda" width="250"/> |
+| <img src="https://github.com/user-attachments/assets/ab9b2c7f-f556-4124-8b08-b4285766e7b4" width="250"/> | <img src="https://github.com/user-attachments/assets/cfa7d0a2-7e57-49ea-8ab1-60c6c6ebd957" width="250"/> | <img src="https://github.com/user-attachments/assets/86c4edca-8007-405b-abf6-479623876181" width="250"/> |
 
-| Portfolio | Trade | Transaction Receipt |
-|:-:|:-:|:-:|
-| <img src="https://github.com/user-attachments/assets/c8574b38-81c1-4a9c-814a-90cb60649c5a" width="250"/> | <img src="https://github.com/user-attachments/assets/2790d516-40cc-40fa-b9c0-4d6fc596dde8" width="250"/> | <img src="https://github.com/user-attachments/assets/83361d5e-971c-43d7-a89e-3548ccb48f7f" width="250"/> |
+| Portfolio | Trade |
+|:-:|:-:|
+| <img src="https://github.com/user-attachments/assets/197faf6f-4201-4d3a-8422-f466d2ca3254" width="250"/> | <img src="https://github.com/user-attachments/assets/cb9558af-4d31-4ca2-bfb6-8e116982dc73" width="250"/> |
 
 </div>
 
