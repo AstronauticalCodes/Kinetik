@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,31 +27,26 @@ import androidx.compose.material.icons.filled.SouthWest
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.md_theme_dark_primaryContainer
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_highest
-import com.example.ui.theme.surface_container_low
-import androidx.compose.material3.Switch
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.viewmodel.CryptoViewModel
 
@@ -71,10 +67,9 @@ public fun ProfileScreen(
       TopAppBar(
         title = {
           Text(
-            text = "PROFILE",
-            style = MaterialTheme.typography.headlineMedium,
-            color = md_theme_dark_primaryContainer,
-            letterSpacing = 2.sp
+            text = "Profile",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            color = Color(0xFF0F172A)
           )
         },
         actions = {
@@ -82,22 +77,22 @@ public fun ProfileScreen(
             Icon(
               imageVector = Icons.Filled.Search,
               contentDescription = "Search",
-              tint = md_theme_dark_onSurfaceVariant
+              tint = Color(0xFF0F172A)
             )
           }
           Box(
             modifier = Modifier
               .padding(end = 16.dp)
-              .size(size = 32.dp)
+              .size(size = 36.dp)
               .clip(shape = CircleShape)
-              .background(color = primary_fixed_dim),
+              .background(color = Color(0xFF1E60F9)),
             contentAlignment = Alignment.Center
           ) {
             Icon(
               imageVector = Icons.Filled.Person,
               contentDescription = "User",
-              tint = Color(color = 0xFF001F24),
-              modifier = Modifier.size(size = 18.dp)
+              tint = Color.White,
+              modifier = Modifier.size(size = 20.dp)
             )
           }
         },
@@ -106,7 +101,7 @@ public fun ProfileScreen(
         )
       )
     },
-    containerColor = Color.Transparent
+    containerColor = Color(0xFFFAFAFA)
   ) { innerPadding ->
     LazyColumn(
       modifier = Modifier
@@ -120,96 +115,152 @@ public fun ProfileScreen(
         Column(
           modifier = Modifier
             .fillMaxWidth(fraction = 1.0f)
-            .background(color = surface_container_high, shape = RoundedCornerShape(size = 16.dp))
+            .background(color = Color.White, shape = RoundedCornerShape(size = 24.dp))
+            .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 24.dp))
             .padding(all = 24.dp),
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
           Box(
             modifier = Modifier
               .size(size = 80.dp)
-              .background(color = primary_fixed_dim, shape = RoundedCornerShape(size = 16.dp)),
+              .background(color = Color(0xFF1E60F9), shape = RoundedCornerShape(size = 20.dp)),
             contentAlignment = Alignment.Center
           ) {
-             Icon(imageVector = Icons.Filled.Person, contentDescription = null, tint = Color(color = 0xFF001F24), modifier = Modifier.size(size = 40.dp))
+             Icon(
+               imageVector = Icons.Filled.Person,
+               contentDescription = null,
+               tint = Color.White,
+               modifier = Modifier.size(size = 44.dp)
+             )
              Box(
                modifier = Modifier
                  .align(alignment = Alignment.BottomEnd)
-                 .background(color = surface_container_highest, shape = RoundedCornerShape(size = 4.dp))
-                 .padding(horizontal = 4.dp, vertical = 2.dp)
+                 .background(color = Color(0xFFEFF6FF), shape = RoundedCornerShape(size = 6.dp))
+                 .border(width = 1.dp, color = Color(0xFFBFDBFE), shape = RoundedCornerShape(size = 6.dp))
+                 .padding(horizontal = 6.dp, vertical = 2.dp)
              ) {
                Row(verticalAlignment = Alignment.CenterVertically) {
-                 Icon(imageVector = Icons.Filled.Verified, contentDescription = null, tint = primary_fixed_dim, modifier = Modifier.size(size = 12.dp))
+                 Icon(
+                   imageVector = Icons.Filled.Verified,
+                   contentDescription = null,
+                   tint = Color(0xFF1E60F9),
+                   modifier = Modifier.size(size = 12.dp)
+                 )
                  Spacer(modifier = Modifier.width(width = 2.dp))
-                 Text(text = "PRO", style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp), color = primary_fixed_dim)
+                 Text(
+                   text = "PRO",
+                   style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                   color = Color(0xFF1E60F9)
+                 )
                }
              }
           }
           Spacer(modifier = Modifier.height(height = 16.dp))
-          Text(text = "Alex Vanguard", style = MaterialTheme.typography.headlineMedium, color = md_theme_dark_onSurface)
-          Text(text = "ID: 88294-TX-09", style = DataMedium, color = md_theme_dark_onSurfaceVariant)
+          Text(
+            text = "Alex Vanguard",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            color = Color(0xFF0F172A)
+          )
+          Spacer(modifier = Modifier.height(height = 4.dp))
+          Text(
+            text = "ID: 88294-TX-09",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF64748B)
+          )
         }
         Spacer(modifier = Modifier.height(height = 16.dp))
       }
       item {
-        
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
+        Row(
+          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
+          horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
+        ) {
           Column(
             modifier = Modifier
               .weight(weight = 1.0f)
-              .background(color = md_theme_dark_primaryContainer, shape = RoundedCornerShape(size = 12.dp))
+              .background(color = Color(0xFF1E60F9), shape = RoundedCornerShape(size = 16.dp))
               .clickable { onNavigateToDeposit() }
-              .padding(vertical = 24.dp),
+              .padding(vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            Icon(imageVector = Icons.Filled.SouthWest, contentDescription = null, tint = Color(color = 0xFF001F24))
+            Icon(imageVector = Icons.Filled.SouthWest, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.height(height = 8.dp))
-            Text(text = "Deposit", style = MaterialTheme.typography.labelSmall, color = Color(color = 0xFF001F24))
+            Text(
+              text = "Deposit",
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+              color = Color.White
+            )
           }
           Column(
             modifier = Modifier
               .weight(weight = 1.0f)
-              .background(color = surface_container_high, shape = RoundedCornerShape(size = 12.dp))
-              .padding(vertical = 24.dp),
+              .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+              .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 16.dp))
+              .padding(vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            Icon(imageVector = Icons.Filled.NorthEast, contentDescription = null, tint = primary_fixed_dim)
+            Icon(imageVector = Icons.Filled.NorthEast, contentDescription = null, tint = Color(0xFF1E60F9))
             Spacer(modifier = Modifier.height(height = 8.dp))
-            Text(text = "Withdraw", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurface)
+            Text(
+              text = "Withdraw",
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+              color = Color(0xFF0F172A)
+            )
           }
         }
-        Spacer(modifier = Modifier.height(height = 8.dp))
-        Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
+        Spacer(modifier = Modifier.height(height = 12.dp))
+        Row(
+          modifier = Modifier.fillMaxWidth(fraction = 1.0f),
+          horizontalArrangement = Arrangement.spacedBy(space = 12.dp)
+        ) {
           Column(
             modifier = Modifier
               .weight(weight = 1.0f)
-              .background(color = surface_container_high, shape = RoundedCornerShape(size = 12.dp))
-              .padding(vertical = 24.dp),
+              .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+              .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 16.dp))
+              .padding(vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            Icon(imageVector = Icons.Filled.GroupAdd, contentDescription = null, tint = Color(color = 0xFF13FF43))
+            Icon(imageVector = Icons.Filled.GroupAdd, contentDescription = null, tint = Color(0xFF22C55E))
             Spacer(modifier = Modifier.height(height = 8.dp))
-            Text(text = "Invite", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurface)
+            Text(
+              text = "Invite",
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+              color = Color(0xFF0F172A)
+            )
           }
           Column(
             modifier = Modifier
               .weight(weight = 1.0f)
-              .background(color = surface_container_high, shape = RoundedCornerShape(size = 12.dp))
-              .padding(vertical = 24.dp),
+              .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+              .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 16.dp))
+              .padding(vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            Icon(imageVector = Icons.Filled.SupportAgent, contentDescription = null, tint = Color(color = 0xFFFFB4AB))
+            Icon(imageVector = Icons.Filled.SupportAgent, contentDescription = null, tint = Color(0xFF64748B))
             Spacer(modifier = Modifier.height(height = 8.dp))
-            Text(text = "Support", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurface)
+            Text(
+              text = "Support",
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+              color = Color(0xFF0F172A)
+            )
           }
         }
         Spacer(modifier = Modifier.height(height = 24.dp))
       }
       item {
-        
         Column(
-          modifier = Modifier.fillMaxWidth(fraction = 1.0f).background(color = surface_container_low, shape = RoundedCornerShape(size = 16.dp)).padding(all = 16.dp)
+          modifier = Modifier
+            .fillMaxWidth(fraction = 1.0f)
+            .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
+            .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 20.dp))
+            .padding(all = 20.dp)
         ) {
-          Text(text = "Preferences", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+          Text(
+            text = "Preferences",
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+            color = Color(0xFF64748B)
+          )
           Spacer(modifier = Modifier.height(height = 16.dp))
           Row(
             modifier = Modifier
@@ -218,18 +269,40 @@ public fun ProfileScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Text(text = "Dark Mode", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
+            Text(
+              text = "Dark Mode",
+              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+              color = Color(0xFF0F172A)
+            )
             Switch(
               checked = uiState.isDarkMode,
-              onCheckedChange = { viewModel.toggleDarkMode() }
+              onCheckedChange = { viewModel.toggleDarkMode() },
+              colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF1E60F9),
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = Color(0xFFE2E8F0)
+              )
             )
           }
+          Spacer(modifier = Modifier.height(height = 8.dp))
+          HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
           Spacer(modifier = Modifier.height(height = 12.dp))
-          Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "App Preferences", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
-            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
+          Row(
+            modifier = Modifier
+              .fillMaxWidth(fraction = 1.0f)
+              .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(
+              text = "App Preferences",
+              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+              color = Color(0xFF0F172A)
+            )
+            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF94A3B8))
           }
-          Spacer(modifier = Modifier.height(height = 16.dp))
+          Spacer(modifier = Modifier.height(height = 4.dp))
           Row(
             modifier = Modifier
               .fillMaxWidth(fraction = 1.0f)
@@ -238,18 +311,42 @@ public fun ProfileScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Text(text = "Security Settings", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
-            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
+            Text(
+              text = "Security Settings",
+              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+              color = Color(0xFF0F172A)
+            )
+            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF94A3B8))
           }
-          Spacer(modifier = Modifier.height(height = 8.dp))
-          Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Notifications", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
-            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
+          Spacer(modifier = Modifier.height(height = 4.dp))
+          Row(
+            modifier = Modifier
+              .fillMaxWidth(fraction = 1.0f)
+              .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(
+              text = "Notifications",
+              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+              color = Color(0xFF0F172A)
+            )
+            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF94A3B8))
           }
-          Spacer(modifier = Modifier.height(height = 16.dp))
-          Row(modifier = Modifier.fillMaxWidth(fraction = 1.0f), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Privacy & Safety", style = MaterialTheme.typography.bodyMedium, color = md_theme_dark_onSurface)
-            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
+          Spacer(modifier = Modifier.height(height = 4.dp))
+          Row(
+            modifier = Modifier
+              .fillMaxWidth(fraction = 1.0f)
+              .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(
+              text = "Privacy & Safety",
+              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+              color = Color(0xFF0F172A)
+            )
+            Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF94A3B8))
           }
         }
         Spacer(modifier = Modifier.height(height = 24.dp))
@@ -257,4 +354,3 @@ public fun ProfileScreen(
     }
   }
 }
-

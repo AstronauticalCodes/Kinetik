@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,13 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -28,18 +29,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.DataLarge
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.secondary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_low
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +55,9 @@ public fun OrderConfirmationSheet(
   ModalBottomSheet(
     onDismissRequest = onDismissRequest,
     sheetState = sheetState,
-    containerColor = Color(color = 0xFF0A0A0C).copy(alpha = 0.95f), 
-    scrimColor = Color.Black.copy(alpha = 0.6f)
+    containerColor = Color.White,
+    scrimColor = Color.Black.copy(alpha = 0.4f),
+    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
   ) {
     Column(
       modifier = Modifier
@@ -71,32 +65,49 @@ public fun OrderConfirmationSheet(
         .padding(all = 24.dp),
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
-      Text(text = "CONFIRM ORDER", style = MaterialTheme.typography.titleMedium, color = md_theme_dark_onSurface)
-      Spacer(modifier = Modifier.height(height = 24.dp))
+      Text(
+        text = "Confirm Order",
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+        color = Color(0xFF0F172A)
+      )
+      Spacer(modifier = Modifier.height(height = 20.dp))
 
       if (errorMessage != null) {
         Box(
           modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
-            .background(color = Color(0xFF3B1216), shape = RoundedCornerShape(8.dp))
-            .border(width = 1.dp, color = Color(0xFFFFB4AB), shape = RoundedCornerShape(8.dp))
+            .background(color = Color(0xFFFEF2F2), shape = RoundedCornerShape(12.dp))
+            .border(width = 1.dp, color = Color(0xFFFECACA), shape = RoundedCornerShape(12.dp))
             .padding(all = 12.dp)
         ) {
-          Text(text = errorMessage, color = Color(0xFFFFB4AB), style = MaterialTheme.typography.bodyMedium)
+          Text(
+            text = errorMessage,
+            color = Color(0xFFDC2626),
+            style = MaterialTheme.typography.bodyMedium
+          )
         }
       }
       
-      Text(text = "You are swapping", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-      Text(text = "$payAmount $payAsset → $receiveAmount $receiveAsset", style = DataLarge.copy(fontSize = 24.sp), color = primary_fixed_dim)
+      Text(
+        text = "You are swapping",
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+        color = Color(0xFF64748B)
+      )
+      Spacer(modifier = Modifier.height(height = 4.dp))
+      Text(
+        text = "$payAmount $payAsset → $receiveAmount $receiveAsset",
+        style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp, fontWeight = FontWeight.Bold),
+        color = Color(0xFF1E60F9)
+      )
       
       Spacer(modifier = Modifier.height(height = 24.dp))
       
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_low, shape = RoundedCornerShape(size = 12.dp))
-          .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f), shape = RoundedCornerShape(size = 12.dp))
+          .background(color = Color(0xFFF8FAFC), shape = RoundedCornerShape(size = 16.dp))
+          .border(width = 1.dp, color = Color(0xFFE2E8F0), shape = RoundedCornerShape(size = 16.dp))
           .padding(all = 16.dp)
       ) {
         OrderRowContent(label = "Pay Amount", value = "$payAmount $payAsset")
@@ -109,9 +120,9 @@ public fun OrderConfirmationSheet(
         }
         OrderRowContent(label = "Network Fee", value = networkFee)
         Spacer(modifier = Modifier.height(height = 12.dp))
-        Box(modifier = Modifier.fillMaxWidth(fraction = 1.0f).height(height = 1.dp).background(color = Color.White.copy(alpha = 0.1f)))
+        HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
         Spacer(modifier = Modifier.height(height = 12.dp))
-        OrderRowContent(label = "Total Cost", value = total, valueColor = primary_fixed_dim)
+        OrderRowContent(label = "Total Cost", value = total, valueColor = Color(0xFF1E60F9))
       }
       
       Spacer(modifier = Modifier.height(height = 24.dp))
@@ -121,28 +132,39 @@ public fun OrderConfirmationSheet(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
           .height(height = 56.dp)
-          .padding(bottom = 16.dp),
+          .padding(bottom = 8.dp),
         colors = ButtonDefaults.buttonColors(
-          containerColor = primary_fixed_dim,
-          contentColor = Color(color = 0xFF001F24)
+          containerColor = Color(0xFF1E60F9),
+          contentColor = Color.White
         ),
-        shape = RoundedCornerShape(size = 12.dp)
+        shape = RoundedCornerShape(size = 16.dp)
       ) {
-        Text(text = "SWIPE TO CONFIRM", style = MaterialTheme.typography.labelLarge)
+        Text(
+          text = "SWIPE TO CONFIRM",
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
       }
     }
   }
 }
 
 @Composable
-public fun OrderRowContent(label: String, value: String, valueColor: Color = md_theme_dark_onSurface): Unit {
+public fun OrderRowContent(label: String, value: String, valueColor: Color = Color(0xFF0F172A)): Unit {
   Row(
     modifier = Modifier.fillMaxWidth(fraction = 1.0f),
     horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Text(text = label, style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-    Text(text = value, style = DataMedium, color = valueColor)
+    Text(
+      text = label,
+      style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp),
+      color = Color(0xFF64748B)
+    )
+    Text(
+      text = value,
+      style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+      color = valueColor
+    )
   }
 }
 
@@ -156,7 +178,8 @@ public fun FilterSortSheet(
   ModalBottomSheet(
     onDismissRequest = onDismissRequest,
     sheetState = sheetState,
-    containerColor = Color(color = 0xFF0A0A0C)
+    containerColor = Color.White,
+    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
   ) {
     Column(
       modifier = Modifier
@@ -164,10 +187,18 @@ public fun FilterSortSheet(
         .padding(horizontal = 24.dp)
         .padding(bottom = 32.dp, top = 8.dp)
     ) {
-      Text(text = "FILTER & SORT", style = MaterialTheme.typography.titleMedium, color = md_theme_dark_onSurface)
+      Text(
+        text = "Filter & Sort",
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+        color = Color(0xFF0F172A)
+      )
       Spacer(modifier = Modifier.height(height = 24.dp))
       
-      Text(text = "Sort By", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+      Text(
+        text = "Sort By",
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
+        color = Color(0xFF64748B)
+      )
       Spacer(modifier = Modifier.height(height = 12.dp))
       LazyRow(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         item { FilterChipSelection(label = "Date (Newest)", isSelected = true) }
@@ -177,7 +208,11 @@ public fun FilterSortSheet(
       
       Spacer(modifier = Modifier.height(height = 24.dp))
       
-      Text(text = "Transaction Type", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+      Text(
+        text = "Transaction Type",
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
+        color = Color(0xFF64748B)
+      )
       Spacer(modifier = Modifier.height(height = 12.dp))
       LazyRow(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         item { FilterChipSelection(label = "All Types", isSelected = true) }
@@ -193,12 +228,15 @@ public fun FilterSortSheet(
           .fillMaxWidth(fraction = 1.0f)
           .height(height = 56.dp),
         colors = ButtonDefaults.buttonColors(
-          containerColor = primary_fixed_dim,
-          contentColor = Color(color = 0xFF001F24)
+          containerColor = Color(0xFF1E60F9),
+          contentColor = Color.White
         ),
-        shape = RoundedCornerShape(size = 12.dp)
+        shape = RoundedCornerShape(size = 16.dp)
       ) {
-        Text(text = "APPLY FILTERS", style = MaterialTheme.typography.labelLarge)
+        Text(
+          text = "APPLY FILTERS",
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
       }
     }
   }
@@ -209,25 +247,31 @@ public fun FilterChipSelection(label: String, isSelected: Boolean): Unit {
   Row(
     modifier = Modifier
       .background(
-        color = if (isSelected) primary_fixed_dim.copy(alpha = 0.2f) else surface_container_low,
+        color = if (isSelected) Color(0xFFEFF6FF) else Color(0xFFF1F5F9),
         shape = RoundedCornerShape(size = 16.dp)
       )
       .border(
         width = 1.dp,
-        color = if (isSelected) primary_fixed_dim else Color.Transparent,
+        color = if (isSelected) Color(0xFF1E60F9) else Color.Transparent,
         shape = RoundedCornerShape(size = 16.dp)
       )
+      .clickable { }
       .padding(horizontal = 16.dp, vertical = 8.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     if (isSelected) {
-      Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = primary_fixed_dim, modifier = Modifier.size(size = 14.dp))
+      Icon(
+        imageVector = Icons.Filled.Check,
+        contentDescription = null,
+        tint = Color(0xFF1E60F9),
+        modifier = Modifier.size(size = 14.dp)
+      )
       Spacer(modifier = Modifier.width(width = 4.dp))
     }
     Text(
       text = label,
-      style = MaterialTheme.typography.labelMedium,
-      color = if (isSelected) primary_fixed_dim else md_theme_dark_onSurfaceVariant
+      style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium),
+      color = if (isSelected) Color(0xFF1E60F9) else Color(0xFF64748B)
     )
   }
 }

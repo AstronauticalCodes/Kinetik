@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -34,15 +33,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_low
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,9 +50,9 @@ public fun DepositScreen(
       TopAppBar(
         title = {
           Text(
-            text = "DEPOSIT",
-            style = MaterialTheme.typography.titleMedium,
-            color = md_theme_dark_onSurface
+            text = "Deposit",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+            color = Color(0xFF0F172A)
           )
         },
         navigationIcon = {
@@ -66,7 +60,7 @@ public fun DepositScreen(
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Back",
-              tint = md_theme_dark_onSurfaceVariant
+              tint = Color(0xFF0F172A)
             )
           }
         },
@@ -75,7 +69,7 @@ public fun DepositScreen(
         )
       )
     },
-    containerColor = Color.Transparent
+    containerColor = Color(0xFFFAFAFA)
   ) { innerPadding ->
     Column(
       modifier = Modifier
@@ -85,54 +79,68 @@ public fun DepositScreen(
     ) {
       Spacer(modifier = Modifier.height(height = 16.dp))
       
-      
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_high.copy(alpha = 0.5f), shape = RoundedCornerShape(size = 12.dp))
-          .border(width = 1.dp, color = Color.White.copy(alpha = 0.05f), shape = RoundedCornerShape(size = 12.dp))
+          .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+          .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 16.dp))
           .padding(all = 16.dp)
       ) {
-        Text(text = "SELECT NETWORK", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+        Text(
+          text = "SELECT NETWORK",
+          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+          color = Color(0xFF64748B)
+        )
         Spacer(modifier = Modifier.height(height = 8.dp))
         Row(
           modifier = Modifier.fillMaxWidth(fraction = 1.0f),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text(text = "Ethereum (ERC20)", style = DataMedium.copy(fontSize = 16.sp), color = md_theme_dark_onSurface)
-          Text(text = "CHANGE", style = MaterialTheme.typography.labelSmall, color = primary_fixed_dim)
+          Text(
+            text = "Ethereum (ERC20)",
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold),
+            color = Color(0xFF0F172A)
+          )
+          Text(
+            text = "CHANGE",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = Color(0xFF1E60F9)
+          )
         }
       }
       
-      Spacer(modifier = Modifier.height(height = 32.dp))
+      Spacer(modifier = Modifier.height(height = 24.dp))
 
-      
       Box(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
-          .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+          .background(color = Color.White, shape = RoundedCornerShape(size = 24.dp))
+          .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 24.dp))
           .padding(all = 32.dp),
         contentAlignment = Alignment.Center
       ) {
         Icon(
           imageVector = Icons.Filled.QrCode2,
           contentDescription = "QR Code",
-          tint = Color.Black,
+          tint = Color(0xFF0F172A),
           modifier = Modifier.size(size = 200.dp)
         )
       }
       
-      Spacer(modifier = Modifier.height(height = 32.dp))
+      Spacer(modifier = Modifier.height(height = 24.dp))
 
-      
-      Text(text = "WALLET ADDRESS", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+      Text(
+        text = "WALLET ADDRESS",
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+        color = Color(0xFF64748B)
+      )
       Spacer(modifier = Modifier.height(height = 8.dp))
       Row(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_low.copy(alpha = 0.8f), shape = RoundedCornerShape(size = 12.dp))
-          .border(width = 1.dp, color = primary_fixed_dim.copy(alpha = 0.3f), shape = RoundedCornerShape(size = 12.dp))
+          .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+          .border(width = 1.dp, color = Color(0xFFE2E8F0), shape = RoundedCornerShape(size = 16.dp))
           .padding(all = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -141,14 +149,14 @@ public fun DepositScreen(
         val depositAddress = "0x8920...3B8c"
         Text(
           text = depositAddress,
-          style = DataMedium.copy(fontSize = 16.sp),
-          color = md_theme_dark_onSurface
+          style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold),
+          color = Color(0xFF0F172A)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(space = 16.dp)) {
           Icon(
             imageVector = Icons.Filled.ContentCopy,
             contentDescription = "Copy",
-            tint = primary_fixed_dim,
+            tint = Color(0xFF1E60F9),
             modifier = Modifier
               .size(size = 20.dp)
               .clickable {
@@ -161,7 +169,7 @@ public fun DepositScreen(
           Icon(
             imageVector = Icons.Filled.Share,
             contentDescription = "Share",
-            tint = md_theme_dark_onSurfaceVariant,
+            tint = Color(0xFF64748B),
             modifier = Modifier
               .size(size = 20.dp)
               .clickable {
@@ -178,13 +186,21 @@ public fun DepositScreen(
       
       Spacer(modifier = Modifier.height(height = 16.dp))
       
-      Text(
-        text = "Send only ETH to this deposit address. Sending coin or token other than ETH to this address may result in the loss of your deposit.",
-        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-        color = Color(color = 0xFFFFB4AB),
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth(fraction = 1.0f)
-      )
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .background(color = Color(0xFFFEF2F2), shape = RoundedCornerShape(size = 12.dp))
+          .border(width = 1.dp, color = Color(0xFFFECACA), shape = RoundedCornerShape(size = 12.dp))
+          .padding(all = 12.dp)
+      ) {
+        Text(
+          text = "Send only ETH to this deposit address. Sending coin or token other than ETH to this address may result in the loss of your deposit.",
+          style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+          color = Color(0xFFEF4444),
+          textAlign = TextAlign.Center,
+          modifier = Modifier.fillMaxWidth(fraction = 1.0f)
+        )
+      }
       
       Spacer(modifier = Modifier.weight(weight = 1.0f))
       
@@ -193,14 +209,17 @@ public fun DepositScreen(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
           .height(height = 56.dp)
-          .padding(bottom = 24.dp),
+          .padding(bottom = 16.dp),
         colors = ButtonDefaults.buttonColors(
-          containerColor = primary_fixed_dim,
-          contentColor = Color(color = 0xFF001F24)
+          containerColor = Color(0xFF1E60F9),
+          contentColor = Color.White
         ),
-        shape = RoundedCornerShape(size = 12.dp)
+        shape = RoundedCornerShape(size = 16.dp)
       ) {
-        Text(text = "DONE", style = MaterialTheme.typography.labelLarge)
+        Text(
+          text = "DONE",
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
       }
     }
   }

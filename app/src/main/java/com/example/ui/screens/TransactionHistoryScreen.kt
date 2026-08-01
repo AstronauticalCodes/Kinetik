@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.CallMade
 import androidx.compose.material.icons.filled.CallReceived
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,15 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.secondary_fixed_dim
-import com.example.ui.theme.surface_container_low
 import com.example.viewmodel.CryptoViewModel
 import com.example.viewmodel.CryptoViewModelFactory
 import java.util.Locale
@@ -73,9 +70,9 @@ public fun TransactionHistoryScreen(
       TopAppBar(
         title = {
           Text(
-            text = "TRANSACTIONS",
-            style = MaterialTheme.typography.titleMedium,
-            color = md_theme_dark_onSurface
+            text = "Transactions",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontSize = 24.sp),
+            color = Color(0xFF0F172A)
           )
         },
         navigationIcon = {
@@ -83,7 +80,7 @@ public fun TransactionHistoryScreen(
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Back",
-              tint = md_theme_dark_onSurfaceVariant
+              tint = Color(0xFF0F172A)
             )
           }
         },
@@ -92,7 +89,7 @@ public fun TransactionHistoryScreen(
             Icon(
               imageVector = Icons.Filled.FilterList,
               contentDescription = "Filter",
-              tint = primary_fixed_dim
+              tint = Color(0xFF1E60F9)
             )
           }
         },
@@ -101,14 +98,13 @@ public fun TransactionHistoryScreen(
         )
       )
     },
-    containerColor = Color.Transparent
+    containerColor = Color(0xFFFAFAFA)
   ) { innerPadding ->
     Column(
       modifier = Modifier
         .fillMaxSize(fraction = 1.0f)
         .padding(paddingValues = innerPadding)
     ) {
-      
       LazyRow(
         modifier = Modifier.fillMaxWidth(fraction = 1.0f).padding(vertical = 8.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
@@ -124,44 +120,57 @@ public fun TransactionHistoryScreen(
         modifier = Modifier.fillMaxSize(fraction = 1.0f).padding(horizontal = 16.dp)
       ) {
         item {
-          Spacer(modifier = Modifier.height(height = 16.dp))
-          Text(text = "RECENT TRANSACTIONS", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
-          Spacer(modifier = Modifier.height(height = 8.dp))
-        }
+          Spacer(modifier = Modifier.height(height = 12.dp))
+          Column(
+            modifier = Modifier
+              .fillMaxWidth()
+              .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
+              .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 20.dp))
+              .padding(all = 16.dp)
+          ) {
+            Text(
+              text = "RECENT TRANSACTIONS",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+              color = Color(0xFF64748B)
+            )
+            Spacer(modifier = Modifier.height(height = 12.dp))
 
-        if (uiState.transactions.isEmpty()) {
-          item {
-            TransactionItem(
-              type = "Received", asset = "BTC", amount = "+0.042 BTC", fiat = "+$2,642.10",
-              icon = Icons.Filled.CallReceived, color = secondary_fixed_dim,
-              onClick = { onNavigateToReceipt("TX-9982") }
-            )
-          }
-          item {
-            TransactionItem(
-              type = "Sent", asset = "ETH", amount = "-1.2 ETH", fiat = "-$3,842.12",
-              icon = Icons.Filled.CallMade, color = md_theme_dark_onSurface,
-              onClick = { onNavigateToReceipt("TX-9981") }
-            )
-          }
-        } else {
-          items(count = uiState.transactions.size) { index ->
-            val tx = uiState.transactions[index]
-            val icon = if (tx.type == "BUY" || tx.type == "SWAP") Icons.Filled.CallReceived else Icons.Filled.CallMade
-            val color = if (tx.type == "BUY" || tx.type == "SWAP") secondary_fixed_dim else Color(0xFFFFB4AB)
-            val amountStr = "${String.format(Locale.US, "%.4f", tx.fromAmount)} ${tx.fromAsset}"
-            val fiatStr = "$${String.format(Locale.US, "%.2f", tx.fromAmount * tx.priceUsd)}"
+            if (uiState.transactions.isEmpty()) {
+              TransactionItem(
+                type = "Received", asset = "BTC", amount = "+0.042 BTC", fiat = "+$2,642.10",
+                icon = Icons.Filled.CallReceived, color = Color(0xFF22C55E),
+                onClick = { onNavigateToReceipt("TX-9982") }
+              )
+              HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+              TransactionItem(
+                type = "Sent", asset = "ETH", amount = "-1.2 ETH", fiat = "-$3,842.12",
+                icon = Icons.Filled.CallMade, color = Color(0xFFEF4444),
+                onClick = { onNavigateToReceipt("TX-9981") }
+              )
+            } else {
+              uiState.transactions.forEachIndexed { index, tx ->
+                val isPositive = tx.type == "BUY" || tx.type == "SWAP"
+                val icon = if (isPositive) Icons.Filled.CallReceived else Icons.Filled.CallMade
+                val color = if (isPositive) Color(0xFF22C55E) else Color(0xFFEF4444)
+                val amountStr = "${String.format(Locale.US, "%.4f", tx.fromAmount)} ${tx.fromAsset}"
+                val fiatStr = "$${String.format(Locale.US, "%.2f", tx.fromAmount * tx.priceUsd)}"
 
-            TransactionItem(
-              type = tx.type,
-              asset = "${tx.fromAsset} → ${tx.toAsset}",
-              amount = amountStr,
-              fiat = fiatStr,
-              icon = icon,
-              color = color,
-              onClick = { onNavigateToReceipt("TX-${tx.id}") }
-            )
+                TransactionItem(
+                  type = tx.type,
+                  asset = "${tx.fromAsset} → ${tx.toAsset}",
+                  amount = amountStr,
+                  fiat = fiatStr,
+                  icon = icon,
+                  color = color,
+                  onClick = { onNavigateToReceipt("TX-${tx.id}") }
+                )
+                if (index < uiState.transactions.size - 1) {
+                  HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+                }
+              }
+            }
           }
+          Spacer(modifier = Modifier.height(height = 24.dp))
         }
       }
     }
@@ -181,15 +190,16 @@ public fun FilterChip(label: String, isSelected: Boolean): Unit {
   Box(
     modifier = Modifier
       .background(
-        color = if (isSelected) primary_fixed_dim else surface_container_low,
+        color = if (isSelected) Color(0xFF1E60F9) else Color(0xFFF0F3FA),
         shape = RoundedCornerShape(size = 16.dp)
       )
+      .clickable { }
       .padding(horizontal = 16.dp, vertical = 8.dp)
   ) {
     Text(
       text = label,
-      style = MaterialTheme.typography.labelMedium,
-      color = if (isSelected) Color(color = 0xFF001F24) else md_theme_dark_onSurfaceVariant
+      style = MaterialTheme.typography.labelMedium.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium),
+      color = if (isSelected) Color.White else Color(0xFF64748B)
     )
   }
 }
@@ -210,20 +220,38 @@ public fun TransactionItem(
       Box(
         modifier = Modifier
           .size(size = 40.dp)
-          .background(color = surface_container_low, shape = CircleShape),
+          .background(color = Color(0xFFF0F3FA), shape = CircleShape),
         contentAlignment = Alignment.Center
       ) {
         Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(size = 20.dp))
       }
       Spacer(modifier = Modifier.width(width = 12.dp))
       Column {
-        Text(text = "$type $asset", style = DataMedium, color = md_theme_dark_onSurface)
-        Text(text = "Completed", style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), color = md_theme_dark_onSurfaceVariant)
+        Text(
+          text = "$type $asset",
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+          color = Color(0xFF0F172A)
+        )
+        Spacer(modifier = Modifier.height(height = 2.dp))
+        Text(
+          text = "Completed",
+          style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
+          color = Color(0xFF64748B)
+        )
       }
     }
     Column(horizontalAlignment = Alignment.End) {
-      Text(text = amount, style = DataMedium, color = color)
-      Text(text = fiat, style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp), color = md_theme_dark_onSurfaceVariant)
+      Text(
+        text = amount,
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+        color = color
+      )
+      Spacer(modifier = Modifier.height(height = 2.dp))
+      Text(
+        text = fiat,
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
+        color = Color(0xFF64748B)
+      )
     }
   }
 }

@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,13 +42,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.ui.theme.DataMedium
-import com.example.ui.theme.md_theme_dark_onSurface
-import com.example.ui.theme.md_theme_dark_onSurfaceVariant
-import com.example.ui.theme.primary_fixed_dim
-import com.example.ui.theme.surface_container_high
-import com.example.ui.theme.surface_container_low
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,9 +61,9 @@ public fun SecuritySettingsScreen(
       TopAppBar(
         title = {
           Text(
-            text = "SECURITY",
-            style = MaterialTheme.typography.titleMedium,
-            color = md_theme_dark_onSurface
+            text = "Security Settings",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+            color = Color(0xFF0F172A)
           )
         },
         navigationIcon = {
@@ -73,7 +71,7 @@ public fun SecuritySettingsScreen(
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Back",
-              tint = md_theme_dark_onSurfaceVariant
+              tint = Color(0xFF0F172A)
             )
           }
         },
@@ -82,7 +80,7 @@ public fun SecuritySettingsScreen(
         )
       )
     },
-    containerColor = Color.Transparent
+    containerColor = Color(0xFFFAFAFA)
   ) { innerPadding ->
     Column(
       modifier = Modifier
@@ -95,10 +93,15 @@ public fun SecuritySettingsScreen(
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_low, shape = RoundedCornerShape(size = 16.dp))
-          .padding(all = 16.dp)
+          .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
+          .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 20.dp))
+          .padding(all = 20.dp)
       ) {
-        Text(text = "Authentication", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+        Text(
+          text = "Authentication",
+          style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+          color = Color(0xFF64748B)
+        )
         Spacer(modifier = Modifier.height(height = 16.dp))
         
         SettingSwitchRow(
@@ -109,7 +112,9 @@ public fun SecuritySettingsScreen(
           onCheckedChange = { isBiometricsEnabled = it }
         )
         
-        Spacer(modifier = Modifier.height(height = 16.dp))
+        Spacer(modifier = Modifier.height(height = 12.dp))
+        HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
+        Spacer(modifier = Modifier.height(height = 12.dp))
         
         SettingSwitchRow(
           icon = Icons.Filled.LockPerson,
@@ -125,10 +130,15 @@ public fun SecuritySettingsScreen(
       Column(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
-          .background(color = surface_container_low, shape = RoundedCornerShape(size = 16.dp))
-          .padding(all = 16.dp)
+          .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
+          .border(width = 1.dp, color = Color(0xFFF1F5F9), shape = RoundedCornerShape(size = 20.dp))
+          .padding(all = 20.dp)
       ) {
-        Text(text = "Devices", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+        Text(
+          text = "Devices",
+          style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+          color = Color(0xFF64748B)
+        )
         Spacer(modifier = Modifier.height(height = 16.dp))
         
         Row(
@@ -137,14 +147,32 @@ public fun SecuritySettingsScreen(
           verticalAlignment = Alignment.CenterVertically
         ) {
           Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = Icons.Filled.Devices, contentDescription = null, tint = primary_fixed_dim, modifier = Modifier.size(size = 24.dp))
+            Icon(
+              imageVector = Icons.Filled.Devices,
+              contentDescription = null,
+              tint = Color(0xFF1E60F9),
+              modifier = Modifier.size(size = 24.dp)
+            )
             Spacer(modifier = Modifier.width(width = 16.dp))
             Column {
-              Text(text = "Session Manager", style = DataMedium, color = md_theme_dark_onSurface)
-              Text(text = "3 active devices", style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+              Text(
+                text = "Session Manager",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFF0F172A)
+              )
+              Spacer(modifier = Modifier.height(height = 2.dp))
+              Text(
+                text = "3 active devices",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFF64748B)
+              )
             }
           }
-          Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = null, tint = md_theme_dark_onSurfaceVariant)
+          Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = Color(0xFF94A3B8)
+          )
         }
       }
       
@@ -158,16 +186,20 @@ public fun SecuritySettingsScreen(
         modifier = Modifier
           .fillMaxWidth(fraction = 1.0f)
           .height(height = 56.dp)
-          .padding(bottom = 24.dp),
+          .padding(bottom = 16.dp),
         colors = ButtonDefaults.buttonColors(
-          containerColor = Color(color = 0x20FFB4AB),
-          contentColor = Color(color = 0xFFFFB4AB)
+          containerColor = Color(0xFFFEF2F2),
+          contentColor = Color(0xFFEF4444)
         ),
-        shape = RoundedCornerShape(size = 12.dp)
+        shape = RoundedCornerShape(size = 16.dp)
       ) {
-        Icon(imageVector = Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(size = 18.dp))
+        Icon(imageVector = Icons.Filled.Warning, contentDescription = null, tint = Color(0xFFEF4444), modifier = Modifier.size(size = 18.dp))
         Spacer(modifier = Modifier.width(width = 8.dp))
-        Text(text = "EMERGENCY LOCK", style = MaterialTheme.typography.labelLarge)
+        Text(
+          text = "EMERGENCY LOCK",
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+          color = Color(0xFFEF4444)
+        )
       }
     }
   }
@@ -187,21 +219,35 @@ public fun SettingSwitchRow(
     verticalAlignment = Alignment.CenterVertically
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-      Icon(imageVector = icon, contentDescription = null, tint = primary_fixed_dim, modifier = Modifier.size(size = 24.dp))
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = Color(0xFF1E60F9),
+        modifier = Modifier.size(size = 24.dp)
+      )
       Spacer(modifier = Modifier.width(width = 16.dp))
       Column {
-        Text(text = title, style = DataMedium, color = md_theme_dark_onSurface)
-        Text(text = subtitle, style = MaterialTheme.typography.labelSmall, color = md_theme_dark_onSurfaceVariant)
+        Text(
+          text = title,
+          style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+          color = Color(0xFF0F172A)
+        )
+        Spacer(modifier = Modifier.height(height = 2.dp))
+        Text(
+          text = subtitle,
+          style = MaterialTheme.typography.labelSmall,
+          color = Color(0xFF64748B)
+        )
       }
     }
     Switch(
       checked = checked,
       onCheckedChange = onCheckedChange,
       colors = SwitchDefaults.colors(
-        checkedThumbColor = Color(color = 0xFF001F24),
-        checkedTrackColor = primary_fixed_dim,
-        uncheckedThumbColor = md_theme_dark_onSurfaceVariant,
-        uncheckedTrackColor = surface_container_high
+        checkedThumbColor = Color.White,
+        checkedTrackColor = Color(0xFF1E60F9),
+        uncheckedThumbColor = Color.White,
+        uncheckedTrackColor = Color(0xFFE2E8F0)
       )
     )
   }
