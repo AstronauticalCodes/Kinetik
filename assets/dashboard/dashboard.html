@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinetik App Store Screenshot - 1</title>
+    <style>
+        /* Reset and basic setup */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            /* Backdrop for viewing in browser */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 40px;
+        }
+
+        /* 
+         * App Store dimensions (6.5" Display) 
+         * 1284 x 2778 pixels 
+         */
+        .screenshot-canvas {
+            width: 1284px;
+            height: 2778px;
+            /* Sleek dark gradient to complement the app's primary blue */
+            background: linear-gradient(150deg, #020617 0%, #1e1b4b 50%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Typography */
+        .text-container {
+            margin-top: 15%;
+            text-align: center;
+            padding: 0 100px;
+            color: #ffffff;
+            z-index: 10;
+        }
+
+        .headline {
+            font-size: 104px;
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -2.5px;
+            margin-bottom: 40px;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sub-headline {
+            font-size: 52px;
+            font-weight: 400;
+            line-height: 1.4;
+            color: #cbd5e1;
+            opacity: 0.9;
+        }
+
+        /* Device Mockup Frame */
+        .device-frame {
+            margin-top: 140px;
+            width: 1050px;
+            height: 2270px;
+            background-color: #ffffff;
+            border-radius: 120px;
+            /* Inner and outer borders to simulate phone bezel */
+            border: 28px solid #0f172a;
+            box-shadow:
+                0 0 0 4px #334155,
+                0 40px 120px rgba(0, 0, 0, 0.6),
+                inset 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* The App UI Image */
+        .device-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            border-radius: 92px;
+            /* Matches inner curve of the bezel */
+        }
+
+        /* Aesthetic Ambient Glow */
+        .glow {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="screenshot-canvas">
+        <div class="glow"></div>
+
+        <div class="text-container">
+            <h1 class="headline">High-Performance<br>Crypto Terminal</h1>
+            <p class="sub-headline">Manage, trade, and track all your<br>assets seamlessly in one place.</p>
+        </div>
+
+        <div class="device-frame">
+            <!-- Ensure Dashboard.jpg is in the same directory -->
+            <img src="Dashboard.png" alt="Kinetik Dashboard UI">
+        </div>
+    </div>
+
+</body>
+
+</html>
